@@ -86,6 +86,29 @@ def get_recent_bars(symbol: str, bars: int = DEFAULT_FETCH_BARS) -> list[Bar]:
     return parsed[-bars:]
 
 
+@retry(times=3, base_delay=2.0)
+def get_current_price(symbol: str) -> float:
+    """Live last-trade price for `symbol`, used by build_dashboard.py to mark open positions to
+    market (the dashboard otherwise only has each position's entry price, which would make "total
+    return" always read ~0% regardless of real market moves). One pair per call, same as
+    get_recent_bars, since Kraken's Ticker response key for a pair doesn't always match the altname
+    we requested it with (e.g. "XBTUSD" can come back keyed as "XXBTZUSD") - requesting one pair at
+    a time sidesteps needing to know that mapping.
+    """
+    pair = SYMBOL_MAP.get(symbol)
+    if pair is None:
+        raise KrakenDataError(f"no Kraken pair mapping for {symbol} - add it to SYMBOL_MAP")
+
+    resp = requests.get(f"{KRAKEN_API}/Ticker", params={"pair": pair}, timeout=15)
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("error"):
+        raise KrakenDataError(f"Kraken API error for {symbol}: {data['error']}")
+
+    ticker = next(iter(data["result"].values()))
+    return float(ticker["c"][0])  # "c" = last trade closed [price, lot volume]
+
+
 def get_all_recent_bars(watchlist: list[str], bars: int = DEFAULT_FETCH_BARS) -> dict[str, list[Bar]]:
     bars_by_symbol = {}
     for symbol in watchlist:

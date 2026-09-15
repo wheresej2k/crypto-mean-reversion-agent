@@ -17,7 +17,15 @@ HEARTBEAT_PATH = Path(__file__).parent / "state" / "last_success.json"
 
 def record_success(summary: dict):
     HEARTBEAT_PATH.parent.mkdir(exist_ok=True)
-    payload = {"timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"), **summary}
+    previous_count = 0
+    if HEARTBEAT_PATH.exists():
+        with open(HEARTBEAT_PATH) as f:
+            previous_count = json.load(f).get("run_count", 0)
+    payload = {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        **summary,
+        "run_count": previous_count + 1,
+    }
     with open(HEARTBEAT_PATH, "w") as f:
         json.dump(payload, f, indent=2)
 

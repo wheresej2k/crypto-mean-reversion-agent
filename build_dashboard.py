@@ -17,6 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from config import load_params
+from kraken_client import KrakenDataError, get_current_price
 
 ROOT = Path(__file__).parent
 STATE_DIR = ROOT / "state"
@@ -69,25 +70,43 @@ def utc_span(timestamp_str):
     return f'<span class="local-time" data-utc="{esc(timestamp_str)}">{esc(timestamp_str)} UTC</span>'
 
 
-def build_positions_table(positions, latest_note):
+def get_live_prices(symbols):
+    """Best-effort live price per symbol - if Kraken's ticker endpoint fails for one symbol, that
+    position falls back to its entry price (shows as 0% P/L) rather than breaking the whole build.
+    """
+    prices = {}
+    for symbol in symbols:
+        try:
+            prices[symbol] = get_current_price(symbol)
+        except (KrakenDataError, Exception) as e:
+            print(f"  WARNING: could not fetch live price for {symbol}: {e}")
+    return prices
+
+
+def build_positions_table(positions, live_prices):
     if not positions:
         return "<p class=\"muted\">No open positions.</p>"
     rows = []
-    for symbol, pos in positions.items():
+    for symbol, pos in sorted(positions.items()):
+        current_price = live_prices.get(symbol, pos["entry_price"])
+        pl_pct = (current_price - pos["entry_price"]) / pos["entry_price"] * 100
+        pl_class = "pos" if pl_pct >= 0 else "neg"
         rows.append(
             "<tr>"
             f"<td>{esc(symbol)}</td>"
             f"<td>{pos['qty']:.6f}</td>"
             f"<td>{fmt_money(pos['entry_price'])}</td>"
+            f"<td>{fmt_money(current_price)}</td>"
             f"<td>{fmt_money(pos['stop_price'])}</td>"
             f"<td>{fmt_money(pos['target_price'])}</td>"
+            f"<td class=\"{pl_class}\">{fmt_pct(pl_pct)}</td>"
             f"<td>{utc_span(pos.get('opened_at'))}</td>"
             "</tr>"
         )
     return (
         "<div class=\"table-scroll\"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th>"
-        f"<th>Stop</th><th>Target</th><th>Opened</th></tr></thead>"
-        f"<tbody>{''.join(rows)}</tbody></table></div>{latest_note}"
+        f"<th>Current</th><th>Stop</th><th>Target</th><th>Unrealized P/L</th><th>Opened</th></tr></thead>"
+        f"<tbody>{''.join(rows)}</tbody></table></div>"
     )
 
 
@@ -130,15 +149,10 @@ def main():
     cash = state.get("cash", 0.0)
     starting_cash = state.get("starting_cash", 100_000.0)
 
-    latest_prices_note = (
-        "<p class=\"muted\">Position values shown are cost basis (entry price x qty) - this "
-        "static page doesn't fetch live prices, so it won't show unrealized P/L. See "
-        "<code>state/paper_state.json</code> in the repo, or wait for the bot's next run, for "
-        "current equity.</p>"
-    )
-    market_value = sum(p["qty"] * p["entry_price"] for p in positions.values())
-    equity_at_cost = cash + market_value
-    total_return_pct = (equity_at_cost - starting_cash) / starting_cash * 100 if starting_cash else 0.0
+    live_prices = get_live_prices(positions.keys())
+    market_value = sum(p["qty"] * live_prices.get(symbol, p["entry_price"]) for symbol, p in positions.items())
+    equity = cash + market_value
+    total_return_pct = (equity - starting_cash) / starting_cash * 100 if starting_cash else 0.0
 
     generated_at = datetime.now(timezone.utc).isoformat()
 
@@ -219,14 +233,15 @@ def main():
 
     <div class="cards">
       <div class="card"><div class="label">Cash</div><div class="value">{fmt_money(cash)}</div></div>
-      <div class="card"><div class="label">Equity (at cost)</div><div class="value">{fmt_money(equity_at_cost)}</div></div>
+      <div class="card"><div class="label">Equity</div><div class="value">{fmt_money(equity)}</div></div>
       <div class="card"><div class="label">Total return</div><div class="value {'pos' if total_return_pct >= 0 else 'neg'}">{fmt_pct(total_return_pct)}</div></div>
       <div class="card"><div class="label">Open positions</div><div class="value">{len(positions)}</div></div>
+      <div class="card"><div class="label">Completed runs</div><div class="value">{last_success.get('run_count', 'n/a')}</div></div>
     </div>
 
     <section>
       <h2>Open positions</h2>
-      {build_positions_table(positions, latest_prices_note)}
+      {build_positions_table(positions, live_prices)}
     </section>
 
     <section>
