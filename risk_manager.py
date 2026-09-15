@@ -3,9 +3,10 @@ enforces limits. No trade reaches Alpaca without passing through here - this is 
 audit/tighten if you want the bot to behave more conservatively.
 
 The risk math itself (position caps, exposure caps, daily-loss circuit breaker) is intentionally
-the same shape as the stock bot's risk_manager.py - a position-size cap is a position-size cap
-regardless of asset class. What's crypto-specific lives elsewhere: crypto_broker.py (no native
-bracket orders) and position_tracker.py (the software-managed stop-loss/take-profit this enables).
+the same shape as the sibling trend-following bot's risk_manager.py - a position-size cap is a
+position-size cap regardless of strategy. What's specific to this bot's execution model lives
+elsewhere: paper_broker.py (the local simulated ledger, since Kraken has no spot paper-trading
+sandbox) and kraken_client.py (live price data).
 """
 from dataclasses import dataclass
 

@@ -4,10 +4,13 @@ live bot to trade one hour at a time. Uses the exact same decision rule (strateg
 exact same risk_manager.evaluate_decisions() as the live bot - this reflects the real rules, not
 a separate rosier simulation.
 
-It also mirrors the real stop-loss/take-profit mechanism: since crypto has no native bracket
-orders (see crypto_broker.py), a simulated position closes at the stop or target price the
-instant an hourly bar's low/high crosses it - exactly the trigger condition the two real resting
-orders in position_tracker.py use.
+It also mirrors the real stop-loss/take-profit mechanism the live bot's paper_broker.py uses: a
+simulated position closes at the stop or target price the instant an hourly bar's low/high
+crosses it.
+
+Historical data comes from Alpaca's free, public crypto market data (no API key needed - see the
+note in kraken_client.py for why backtesting stays on Alpaca while live trading uses Kraken).
+This project needs no Alpaca account at all; the data client below is deliberately unauthenticated.
 
 Usage:
     python backtest.py                 # last 8760 hours (~1 year)
@@ -23,7 +26,7 @@ from alpaca.data.requests import CryptoBarsRequest
 from alpaca.data.timeframe import TimeFrame
 
 from config import load_settings
-from crypto_broker import Bar, PositionSnapshot
+from models import Bar, PositionSnapshot
 from risk_manager import evaluate_decisions
 from strategy import decide, rolling_mean_std_series
 
@@ -209,7 +212,7 @@ def main():
     args = parser.parse_args()
 
     settings = load_settings()
-    data_client = CryptoHistoricalDataClient(settings.alpaca_api_key, settings.alpaca_secret_key)
+    data_client = CryptoHistoricalDataClient()  # no keys - Alpaca's crypto market data is public
 
     print(f"Backtesting {', '.join(settings.watchlist)} over the last {args.hours} hourly bars (~{args.hours / 24 / 365.25:.1f} years)...\n")
     r = run_backtest(settings, data_client, args.hours)

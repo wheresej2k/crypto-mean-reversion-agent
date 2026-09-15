@@ -1,25 +1,25 @@
-# Crypto Mean-Reversion Agent (paper trading, 100% free)
+# Crypto Mean-Reversion Agent (paper trading, 100% free, zero exchange accounts needed)
 
 An automated crypto trading bot: a free, rule-based strategy (mean reversion on hourly bars - see
 `strategy.py`) watches a crypto watchlist 24/7 for coins trading meaningfully below their own
 recent rolling average, buys the dip, and sells once the price has reverted back up - taking the
 bounce as profit rather than waiting for a sustained trend. A risk-limit layer filters those
-signals before anything reaches Alpaca, and a "software bracket" (see below) manages stop-loss/
-take-profit protection the way Alpaca's own bracket orders would - if crypto supported them, which
-it doesn't.
+signals before anything is "traded," and every trade is executed in a locally-simulated paper
+ledger against real live Kraken prices - see "Why there's no exchange API key" below for why.
 
-**This runs entirely on free services: Alpaca's paper-trading environment (no real money, no
-funding required), Alpaca's free crypto market data, and GitHub Actions' free automation minutes.
-There is no paid API involved anywhere.**
+**This runs entirely on free services: Kraken's public market data, Alpaca's free public crypto
+history for backtesting, and GitHub Actions' free automation minutes. No exchange account, no
+API key, and no paid API is involved anywhere.**
 
 ## Sibling project, different temperament
 
 This is a sibling to `crypto-trading-agent`, which trades a slow, patient trend-following
-crossover strategy and can sit out for days or weeks waiting for a sustained move. **This bot is
-built to be the opposite: aggressive and active.** Mean reversion treats "a temporary dip" as an
-actionable signal, and temporary dips happen far more often than sustained trends - the backtest
-below found this bot taking roughly **4+ trades a day across a 5-coin watchlist**, versus the
-trend-following sibling's occasional multi-day holds.
+crossover strategy on Alpaca's paper-trading environment and can sit out for days or weeks
+waiting for a sustained move. **This bot is built to be the opposite: aggressive and active.**
+Mean reversion treats "a temporary dip" as an actionable signal, and temporary dips happen far
+more often than sustained trends - the validated backtest below found this bot taking roughly
+**4+ trades a day across a 5-coin watchlist**, versus the trend-following sibling's occasional
+multi-day holds.
 
 **"Aggressive/active" describes how often it trades and how often it checks in - not a promise
 that every day is profitable.** No real strategy wins every single day; some individual trades
@@ -27,10 +27,46 @@ here will lose (the backtest below has a real, non-zero loss rate). The goal is 
 average over many trades, with the stop-loss capping how bad any single loss can get - not a
 guarantee stated or implied about daily results.
 
-**This project also uses its own, separate Alpaca paper account from `crypto-trading-agent`** -
-not the same login, not the same paper keys. See "One-time setup" below for why and how. That
-keeps the two bots' equity, cash, and exposure math fully independent, so one bot's activity never
-shows up in the other's numbers.
+**This project trades on Kraken, not Alpaca** - a deliberate choice made after discussing it, since
+Kraken is the exchange whose app is already on your phone. See the next section for what that
+actually means mechanically, since it's not a simple broker swap.
+
+## Why there's no exchange API key
+
+Alpaca (used by the sibling bot) offers a first-class **paper-trading account**: a real API-backed
+sandbox with its own fake balance, its own dashboard, real order objects, real fills. Kraken has
+no equivalent for spot markets - only a separate "Futures Demo" product (leveraged perpetual
+futures, a different instrument than spot buy/sell dips).
+
+So "paper trading on Kraken" here means something different from the sibling bot: this project
+pulls **real, live Kraken prices** (`kraken_client.py`, Kraken's public market data - no account or
+key needed) and simulates every trade in a **local ledger** (`paper_broker.py`) - a virtual cash
+balance and set of positions tracked in `state/paper_state.json`, committed back to the repo after
+every run. Nothing here ever places a real order anywhere, on Kraken or otherwise. Historical
+backtesting (`backtest.py`/`tune.py`) separately uses Alpaca's free public crypto data (also no key
+needed) since it has much deeper history in a single API call than Kraken's public OHLC endpoint
+(which caps at ~721 hourly candles per call, i.e. about a month).
+
+**The real, honest tradeoff this introduces** (read this before trusting it):
+- **No dashboard.** Alpaca gave the sibling bot a real web dashboard to check positions/P&L
+  anytime. This bot's "account" only exists in `state/paper_state.json` and `logs/trade_log.csv` -
+  check those files (or wait for the daily text) to see what it's doing.
+- **Stop-loss/take-profit are checked once per run, not continuously.** A real Alpaca resting
+  order protects a position on the exchange itself, 24/7, independent of whether the bot happens
+  to be running. This local ledger only checks a position's stop/target levels against whatever
+  bars were fetched the moment `trader.py` runs. In practice this is less scary than it sounds:
+  `paper_broker.py` checks *every* bar fetched since the position was last checked (not just the
+  newest one), so even if a run is late or missed, the next run correctly finds the exact historical
+  bar that crossed the stop/target and closes at that price - the P/L stays accurate, only the
+  *timing* of the recorded exit lags behind a real resting order. Running hourly (matching the
+  bars the strategy was validated on) is the same cadence `backtest.py`/`tune.py` used to check
+  stop/target hits, so live behavior should track the validated backtest closely as long as the
+  scheduled workflow keeps running - which is exactly what `watchdog.py` exists to catch if it
+  doesn't.
+- **Kraken's asset naming is quirky.** Dogecoin is `XDG` on Kraken, not `DOGE` - confirmed against
+  Kraken's own `/0/public/AssetPairs` endpoint, not guessed. `kraken_client.SYMBOL_MAP` handles
+  this translation so the rest of the codebase only ever sees this project's own `"BASE/USD"`
+  naming.
 
 ## The strategy: buy the dip, sell the reversion
 
@@ -46,10 +82,9 @@ currently sits.
   (price has reverted back toward - or past - its recent average; take the bounce as profit).
 - Otherwise **HOLD** - no actionable signal.
 
-The stop-loss/take-profit resting orders (`position_tracker.py`, shared unchanged with the sibling
-project) are the real safety net if a "dip" just keeps falling instead of reverting: the strategy's
-own SELL signal is the target case (reversion happened, take it), the stop-loss is the fallback
-case (reversion never came, cut the loss).
+The stop-loss/take-profit levels (`paper_broker.py`) are the real safety net if a "dip" just keeps
+falling instead of reverting: the strategy's own SELL signal is the target case (reversion
+happened, take it), the stop-loss is the fallback case (reversion never came, cut the loss).
 
 ## The goal, stated concretely (read this before trusting any of it)
 
@@ -74,10 +109,10 @@ full story (drawdown/win-rate answer "could this wreck my account"; a rally or a
 return look artificially bad or good on its own, in either direction, regardless of strategy
 quality).
 
-### Actual validated results (2026-09-14)
+### Actual validated results (2026-09-14, against Alpaca's historical crypto data)
 
 A 729-combination grid search (`window`, `entry_zscore`, `exit_zscore`, `stop_loss_pct`,
-`take_profit_pct`, `min_confidence`) against real hourly Alpaca crypto history found **315 of 729**
+`take_profit_pct`, `min_confidence`) against real hourly crypto history found **315 of 729**
 combinations passed the safety filter. The winner, now live in `config/params.json`:
 
 `window=12h, entry_zscore=1.5, exit_zscore=-0.5, stop_loss=10%, take_profit=5%, min_confidence=50`
@@ -102,11 +137,14 @@ out to hit.
   over a 5-year window with 1,500+ round trips, that compounding is a large share of the
   eye-catching `+390%` figure. It is not evidence that any single trade, day, or month will look
   like that.
-- **No fees or slippage modeled.** Real fills, especially during the fast moves this strategy is
-  designed to catch, will differ from the backtest's clean bar-close/high/low fills.
+- **No fees or slippage modeled**, on either the Alpaca data the backtest used or the Kraken prices
+  live trading actually uses. Real fills would differ from both.
 - **Some trades lose, by design.** A 66-75% win rate means roughly 1 in 3-4 completed trades is a
   loss. The stop-loss exists specifically to cap how bad any one of those losses gets - it is not
   a sign something is broken when a trade closes red.
+- **Backtested on Alpaca's prices, traded live on Kraken's.** The two venues track the same
+  underlying assets closely (arbitrage keeps them tight), but they are not identical feeds - live
+  results will differ somewhat from the backtest even before accounting for fees/slippage.
 
 See `diagnose()` in `tune.py` if you want to re-derive any of this yourself. Tighten or loosen
 further in `tune.py` if your risk tolerance changes.
@@ -114,23 +152,27 @@ further in `tune.py` if your risk tolerance changes.
 ## The four pillars this project is built around
 
 ### 1. ACCURATE - the right data, in the right shape
-- `crypto_broker.py` pulls hourly bars directly from Alpaca's own crypto market data.
+- `kraken_client.py` pulls hourly bars directly from Kraken's public market data for live trading;
+  `backtest.py`/`tune.py` use Alpaca's public crypto data for historical validation.
 - **Data granularity matches the strategy**: the bot runs once an hour, trading on hourly bars.
 - `data_validator.py` checks every bar of market data **before** the strategy ever sees it:
   staleness, gaps, and implausible single-hour moves. A symbol that fails any check is dropped
-  from *that run only* and logged.
+  from *that run only* and logged - and, notably, is also skipped for stop/target reconciliation
+  that run (see "Why there's no exchange API key" above), rather than risking a false trigger on
+  bad data.
 
 ### 2. RELIABLE - runs 24/7 without you babysitting it
-- `retry.py` wraps every Alpaca API call in automatic retries with exponential backoff.
+- `retry.py` wraps every network call (Kraken and Alpaca) in automatic retries with exponential
+  backoff.
 - Every error is logged clearly (`logs/trade_log.csv` gets a row, GitHub Actions shows the full
   traceback) - nothing fails silently.
 - **Missed-run detection**: `heartbeat.py` records a timestamp after every successful run; a
   completely separate scheduled workflow (`.github/workflows/watchdog.yml`, `watchdog.py`) checks
   hourly and texts a plain-text warning if more than `WATCHDOG_ALERT_AFTER_HOURS` (default 2) hours
-  have passed with no successful run - this is a direct, deliberate reuse of a real fix the
-  sibling project needed after its own schedule silently missed a run.
-- **Stop-loss/take-profit protection doesn't depend on the bot running at all** - the two resting
-  orders `position_tracker.py` places sit directly on Alpaca's exchange and execute continuously.
+  have passed with no successful run.
+- **Stop-loss/take-profit protection depends on the bot actually running** - the real reliability
+  tradeoff of not having a real exchange behind this bot. See "Why there's no exchange API key"
+  above for exactly what this does and doesn't affect.
 
 ### 3. WELL-DEFINED GOAL - see the section above
 Explicit, quantified, and enforced by `tune.py`'s safety filter before any parameter set is
@@ -158,11 +200,13 @@ considered "good," not just implied by whatever the code happens to do.
 |---|---|---|
 | Signal | SMA crossover + long-term trend filter | Rolling mean/std z-score (Bollinger-Band-style) |
 | Temperament | Patient - waits for a sustained move, often sits out for days | Active - treats a temporary dip as actionable, trades most days |
-| Entry logic | Short-term average crosses above long-term average, AND price above a macro trend filter | Price drops `entry_zscore` standard deviations below its own rolling mean |
-| Exit logic | Bearish crossover | Price reverts to `exit_zscore` (near/above the rolling mean) |
+| Exchange | Alpaca (paper-trading account) | Kraken (live prices) + a locally-simulated ledger |
+| Execution | Real paper orders on Alpaca's API | Fully simulated locally - no real order ever placed anywhere |
+| Account/API key needed | Yes - Alpaca paper keys | **None at all** - both data sources (Kraken, Alpaca) are used unauthenticated |
+| Stop-loss/take-profit | Real resting orders, protect 24/7 independent of run frequency | Checked once per run against fetched bars (see tradeoff above) |
+| Monitoring | Alpaca's own web dashboard | `state/paper_state.json` + `logs/trade_log.csv` + the daily text - no external dashboard |
 | Observed trade frequency | Occasional - can sit out for days/weeks | ~4+ trades/day across a 5-symbol watchlist (see backtest above) |
-| Alpaca account | Its own paper account | **A separate, second paper account** - not shared with the sibling |
-| Everything else (data validation, bracket orders, risk limits, retries, watchdog, logging schema shape) | Same proven infrastructure, copied unmodified where the logic is asset/strategy-agnostic | |
+| Everything else (risk limits, retries, watchdog, logging schema shape) | Same proven infrastructure, copied unmodified where the logic is strategy-agnostic | |
 
 ## One-time setup
 
@@ -170,38 +214,27 @@ considered "good," not just implied by whatever the code happens to do.
 If you don't already have it, install Python 3.11+ from [python.org](https://www.python.org/downloads/)
 (check "Add python.exe to PATH" during install on Windows).
 
-### 2. Get a SECOND, separate Alpaca paper-trading account (free)
-**This is the one step that's different from the sibling project.** Alpaca ties one paper-trading
-account to one login, so to keep this bot's paper money genuinely separate from
-`crypto-trading-agent`'s, you need a second Alpaca account:
-
-1. Sign up at [alpaca.markets](https://alpaca.markets/) using a **different email address** than
-   the one used for the sibling project's account - free, no payment method needed.
-2. Go to the [Paper Trading dashboard](https://app.alpaca.markets/paper/dashboard/overview) on
-   that second account.
-3. Generate an API key pair there - make sure you're looking at the **paper** keys, not the live
-   ones.
-
-### 3. Install dependencies
+### 2. Install dependencies
 Open a terminal in this folder and run:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure your keys
-Copy `.env.example` to a new file named `.env` in this same folder, then fill in the **second
-account's** Alpaca keys, phone/Gmail info, and watchlist.
+### 3. Configure notifications
+Copy `.env.example` to a new file named `.env` in this same folder, then fill in your phone/Gmail
+info and watchlist. **No exchange API key goes in here** - see "Why there's no exchange API key"
+above.
 
-**Never commit or share your `.env` file - it contains your API keys.** It's already listed in
-`.gitignore` so `git` won't track it.
+**Never commit or share your `.env` file.** It's already listed in `.gitignore` so `git` won't
+track it.
 
-### 5. Review the strategy/risk parameters
+### 4. Review the strategy/risk parameters
 `config/params.json` holds the tunable numbers - it's already seeded with the validated winner
 from the 2026-09-14 tuning sweep (see "Actual validated results" above). Re-run `tune.py` yourself
 any time you want to re-derive this against fresher data.
 
-### 6. Set up phone notifications (optional but recommended)
+### 5. Set up phone notifications (optional but recommended)
 1. **Carrier MMS gateway**: find your carrier's free email-to-picture-message address, e.g.
    `5551234567@vzwpix.com` (Verizon), `5551234567@tmomail.net` (T-Mobile),
    `5551234567@mypixmessages.com` (AT&T). Put it in `.env` as `PHONE_MMS_ADDRESS`.
@@ -216,8 +249,8 @@ Always test with `--dry-run` first:
 python trader.py --dry-run
 ```
 
-Check `logs/trade_log.csv` and the console output. Once comfortable, run it for real (still paper
-money):
+Check `logs/trade_log.csv` and the console output. Once comfortable, run it for real (still
+simulated - nothing here ever places a real order):
 
 ```bash
 python trader.py
@@ -238,10 +271,13 @@ python tune.py            # always fetches fresh history from Alpaca
 python tune.py --cache    # reuse a local cache while iterating - don't use for a real decision
 ```
 
-Expect the fetch to take a few minutes (pulling years of hourly data for 5 symbols); the sweep
-itself is fast thanks to `strategy.rolling_mean_std_series`'s O(n) rolling computation. Running
-`tune.py` never changes anything live on its own - copy the winning combination into
-`config/params.json` yourself, or let the monthly automated retune propose it as a pull request.
+Both pull historical data from Alpaca's free public crypto API (no key needed) - this is
+deliberately separate from the Kraken prices `trader.py`/`notify.py` use live (see "Why there's no
+exchange API key" above for why the two data sources differ). Expect the fetch to take a few
+minutes; the sweep itself is fast thanks to `strategy.rolling_mean_std_series`'s O(n) rolling
+computation. Running `tune.py` never changes anything live on its own - copy the winning
+combination into `config/params.json` yourself, or let the monthly automated retune propose it as
+a pull request.
 
 ## Running it automatically, 24/7
 
@@ -255,17 +291,14 @@ Three separate GitHub Actions workflows, all free:
   request proposing updated strategy parameters (never auto-merged).
 
 ### Setting your secrets
-Set these once via the GitHub CLI (prompts you securely):
+Set these once via the GitHub CLI (prompts you securely) - just three, since no exchange API key
+is needed anywhere in this project:
 
 ```bash
-gh secret set ALPACA_API_KEY
-gh secret set ALPACA_SECRET_KEY
 gh secret set GMAIL_ADDRESS
 gh secret set GMAIL_APP_PASSWORD
 gh secret set PHONE_MMS_ADDRESS
 ```
-
-**Use the second Alpaca account's keys here** - not the sibling project's.
 
 ### On repo privacy
 This repo is set up as **private**. `.env` is git-ignored and never committed, GitHub Secrets are
@@ -278,25 +311,27 @@ own redaction.
 
 - `logs/trade_log.csv` - one row per decision, plus a linked row when a position closes, with the
   rolling mean/z-score the strategy saw and the realized P/L.
-- `state/open_brackets.json` - which positions currently have live protective orders.
+- `state/paper_state.json` - the entire simulated account: cash, and every currently open position
+  with its stop/target levels. **There is no external dashboard for this bot** (unlike the sibling
+  Alpaca bot) - this file and the trade log are the source of truth.
 - `state/last_success.json` - when the bot last completed a run successfully.
-- Your **second** [Alpaca paper dashboard](https://app.alpaca.markets/paper/dashboard/overview)
-  shows live positions, P/L, and order history directly.
 
 ## Important limitations - please read
 
 - **This is not a validated trading strategy.** Mean reversion is a simple, transparent, free
   technical rule, not an edge over the market. Treat any paper-trading results as exploratory, not
   predictive of real performance.
-- **Stay on paper trading.** `paper=True` is hard-coded into `crypto_broker.py`. Live trading
-  would require a separately validated strategy, much more extensive testing, and a clear-eyed,
-  explicit conversation about money you could fully afford to lose.
+- **This is a local simulation, not real trading of any kind, on any platform.** No order is ever
+  placed on Kraken, Alpaca, or anywhere else. If you ever want to go live for real, that requires
+  wiring up Kraken's actual private trading API with real credentials, a much longer paper track
+  record than this project has, and a clear-eyed, explicit conversation about money you could
+  fully afford to lose.
 - **No day is guaranteed green.** This bot trades far more often than the sibling bot, which means
   more individual losing trades in absolute terms even when the overall win rate and average
   return look good - see "Actual validated results" above for the real, non-zero loss rate.
 - **The daily-loss limit is a circuit breaker, not a guarantee.** It stops *new* buys once the
-  day's loss threshold is hit; the resting stop-loss on each open position is what protects it
-  individually, continuously, on Alpaca's own exchange.
+  day's loss threshold is hit; existing positions are still only protected when the bot next runs
+  (see "Why there's no exchange API key" above).
 - **One open position per symbol at a time** - the bot won't add to a position it's already
   holding.
 - **Backtest returns include compounding effects from a high trade count** - see the caveat under
@@ -304,7 +339,6 @@ own redaction.
   should expect to repeat.
 - **This is built for hourly decisions on a five-coin watchlist**, not high-frequency or
   scalping-style trading.
-- **Keep this on its own, separate Alpaca account.** If you ever point this at the same account as
-  `crypto-trading-agent`, the two bots' `max_position_pct`/`max_total_exposure_pct` checks would be
-  computed against combined equity, and each bot's activity would show up in the other's Alpaca
-  dashboard - defeating the point of keeping them independent.
+- **Backtested on Alpaca prices, lives on Kraken prices** - a deliberate, documented tradeoff (see
+  above), not an oversight, but real enough that live results will differ somewhat from the
+  validated backtest even before fees/slippage are considered.

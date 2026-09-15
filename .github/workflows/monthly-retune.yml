@@ -10,8 +10,8 @@ permissions:
   pull-requests: write
 
 env:
-  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
-  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  # No exchange API key needed - tune.py fetches historical data from Alpaca's free public crypto
+  # market data (no key required). See README's "Why there's no exchange API key" section.
   WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
 
 jobs:

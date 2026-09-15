@@ -1,6 +1,6 @@
 """Loads settings from two deliberately separate places:
 
-- .env (git-ignored, holds secrets: Alpaca keys, phone/Gmail) plus WATCHLIST, which is your
+- .env (git-ignored, holds phone/Gmail notification secrets) plus WATCHLIST, which is your
   choice, not something tune.py touches.
 - config/params.json (git-committed, NOT secret: the strategy/risk numbers tune.py can propose
   changes to). Keeping tunable knobs in a plain JSON file - not buried in a GitHub Actions
@@ -8,11 +8,12 @@
   .github/workflows/monthly-retune.yml) propose changes as a reviewable file diff in a pull
   request, instead of silently rewriting live automation.
 
-IMPORTANT: this project uses ITS OWN separate Alpaca paper account, with its own ALPACA_API_KEY /
-ALPACA_SECRET_KEY in .env - deliberately not the same keys as the sibling crypto-trading-agent
-project. That keeps the two bots' equity, cash, and exposure math fully independent instead of
-both drawing against one shared pool of paper money. See README.md for how to get a second,
-separate Alpaca account.
+NO EXCHANGE ACCOUNT OR API KEY IS NEEDED for this project at all. Live trading is executed
+entirely in a local simulated ledger (paper_broker.py) against live Kraken prices (kraken_client.py,
+public data, no key), and backtesting uses Alpaca's free public crypto market data (also no key -
+see kraken_client.py's docstring for why the two data sources differ). This is a deliberate design
+choice made after the user asked to trade on Kraken specifically, which has no spot paper-trading
+sandbox - see README's "Why there's no exchange API key" section.
 
 Fails loudly (exits with a clear message) if anything required is missing, rather than silently
 trading with defaults - this is part of the ACCURATE pillar: no run should ever proceed on
@@ -53,8 +54,6 @@ def _require(name: str) -> str:
 
 @dataclass(frozen=True)
 class Settings:
-    alpaca_api_key: str
-    alpaca_secret_key: str
     watchlist: list[str]
     window: int
     entry_zscore: float
@@ -90,8 +89,6 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
     params = load_params(params_path)
 
     return Settings(
-        alpaca_api_key=_require("ALPACA_API_KEY"),
-        alpaca_secret_key=_require("ALPACA_SECRET_KEY"),
         watchlist=watchlist,
         window=int(params["window"]),
         entry_zscore=float(params["entry_zscore"]),

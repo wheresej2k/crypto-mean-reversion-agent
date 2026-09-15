@@ -12,8 +12,9 @@ permissions:
   contents: write
 
 env:
-  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
-  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  # No exchange API key needed anywhere in this workflow - live prices come from Kraken's public
+  # API (kraken_client.py) and trades are simulated locally (paper_broker.py). See README's "Why
+  # there's no exchange API key" section.
   # Your choice, not something tune.py/auto_retune.py ever touches. Strategy/risk parameters
   # live in config/params.json instead - see README for why they're kept separate.
   WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
@@ -65,7 +66,7 @@ jobs:
           # logs/*.csv is gitignored (keeps local dry-run test logs out of git on your own
           # machine) - -f explicitly overrides that just for the real trade log. state/ files
           # aren't gitignored but may not exist yet on a brand-new repo's first run.
-          for f in logs/trade_log.csv state/open_brackets.json state/last_success.json; do
+          for f in logs/trade_log.csv state/paper_state.json state/last_success.json; do
             if [ -f "$f" ]; then
               git add -f "$f"
             fi

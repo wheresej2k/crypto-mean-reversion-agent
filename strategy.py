@@ -8,10 +8,11 @@ back) and sells once price has reverted back up near/above the average - taking 
 profit rather than waiting for a trend. This naturally generates far more trade opportunities than
 trend-following, since "a temporary dip" happens much more often than "a sustained multi-day move".
 
-The stop-loss/take-profit resting orders (see position_tracker.py, unchanged from the sibling
-project) remain the real safety net if a "dip" just keeps falling instead of reverting - this
-strategy's own SELL signal is the target case (reversion happened, take it), the stop-loss is the
-fallback case (reversion never came).
+The stop-loss/take-profit levels (see paper_broker.py's locally-simulated ledger - Kraken has no
+spot paper-trading sandbox, so this project trades on real Kraken prices against a local virtual
+balance instead of real exchange orders) remain the real safety net if a "dip" just keeps falling
+instead of reverting - this strategy's own SELL signal is the target case (reversion happened,
+take it), the stop-loss is the fallback case (reversion never came).
 
 This module only ever sees data that already passed data_validator.py - data-quality concerns are
 handled entirely upstream, so this stays focused on the signal math.
@@ -25,7 +26,7 @@ Two entry points share one decision core (decide()), same pattern as the sibling
 import math
 from dataclasses import dataclass
 
-from crypto_broker import Bar
+from models import Bar
 
 # Scaled so roughly a 2.5-standard-deviation move reaches full (100) confidence.
 CONFIDENCE_SCALE = 40

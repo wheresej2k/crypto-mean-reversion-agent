@@ -15,7 +15,7 @@ import math
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
-from crypto_broker import Bar
+from models import Bar
 
 MAX_STALENESS_HOURS = 2.5  # a bit over 2x the hourly run cadence - one missed bar is tolerated
 MAX_GAP_HOURS = 2.5

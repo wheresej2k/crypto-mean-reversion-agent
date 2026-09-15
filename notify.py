@@ -22,8 +22,9 @@ from email.mime.multipart import MIMEMultipart
 
 from PIL import Image, ImageDraw, ImageFont
 
-from crypto_broker import CryptoBroker
+import kraken_client
 from config import load_settings
+from paper_broker import PaperBroker
 
 LOG_PATH = os.path.join(os.path.dirname(__file__), "logs", "trade_log.csv")
 IMAGE_PATH = os.path.join(tempfile.gettempdir(), "mean_reversion_daily_summary.png")
@@ -138,12 +139,19 @@ def send_mms(to_address, gmail_address, gmail_app_password):
 
 def main():
     settings = load_settings()
-    broker = CryptoBroker(settings.alpaca_api_key, settings.alpaca_secret_key)
-    account = broker.get_account()
+    broker = PaperBroker()
+    latest_prices = {}
+    for symbol in settings.watchlist:
+        try:
+            latest_prices[symbol] = kraken_client.get_recent_bars(symbol, hours=1)[-1].close
+        except Exception as e:
+            print(f"  WARNING: could not fetch latest price for {symbol}: {e}")
+
+    account = broker.get_account(latest_prices)
     day_pl_usd = account.equity - account.last_equity
 
     rows = todays_log_rows()
-    positions = broker.get_positions()
+    positions = broker.get_positions(latest_prices)
     build_image(account.equity, day_pl_usd, account.day_pl_pct, rows, positions.keys())
 
     to_address = os.environ["PHONE_MMS_ADDRESS"]

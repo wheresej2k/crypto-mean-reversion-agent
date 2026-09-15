@@ -29,7 +29,7 @@ def write_summary(text: str):
 
 def main():
     base_settings = load_settings()
-    data_client = CryptoHistoricalDataClient(base_settings.alpaca_api_key, base_settings.alpaca_secret_key)
+    data_client = CryptoHistoricalDataClient()  # no keys - Alpaca's crypto market data is public
 
     current_params = load_params()
     print(f"Current live parameters: {current_params}")

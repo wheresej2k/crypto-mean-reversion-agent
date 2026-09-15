@@ -53,8 +53,8 @@ def log_row(
 
 
 def log_close_event(event: dict):
-    """Logs a bracket close (stop-loss, take-profit, or signal exit) produced by
-    position_tracker.reconcile()/close_bracket_for_signal_exit().
+    """Logs a position close (stop-loss, take-profit, or signal exit) produced by
+    paper_broker.py's check_stop_target_hits()/close_position().
     """
     log_row(
         symbol=event["symbol"],
