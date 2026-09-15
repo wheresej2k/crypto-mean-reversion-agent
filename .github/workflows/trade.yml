@@ -66,6 +66,11 @@ jobs:
         run: python notify.py
 
       - name: Commit updated trade log and state
+        # Runs regardless of whether the notify step above succeeded, failed, or was skipped -
+        # same fix applied to the sibling crypto-trading-agent repo on 2026-09-15 after a Gmail
+        # credential failure there was found silently preventing this step from ever running,
+        # which could make a real successful trading run vanish from the repo's own history.
+        if: always()
         run: |
           git config user.name "crypto-mean-reversion-bot"
           git config user.email "actions@users.noreply.github.com"

@@ -24,6 +24,8 @@ LOG_PATH = ROOT / "logs" / "trade_log.csv"
 OUT_PATH = ROOT / "docs" / "index.html"
 MAX_LOG_ROWS = 40
 
+SIBLING_DASHBOARD_URL = "https://wheresej2k.github.io/crypto-trading-agent/"
+
 
 def load_json(path):
     if path.exists():
@@ -145,7 +147,7 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crypto Mean-Reversion Bot - Kraken Paper Ledger</title>
+<title>Crypto Bots - Kraken Mean-Reversion + Alpaca Trend-Following</title>
 <style>
   :root {{
     color-scheme: light dark;
@@ -184,50 +186,78 @@ def main():
   footer {{ text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }}
   a {{ color: var(--accent); }}
   code {{ background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 12px; }}
+  .tabs {{ display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }}
+  .tab-btn {{
+    background: none; border: none; color: var(--muted); font: inherit; font-weight: 600;
+    padding: 10px 4px; margin-right: 16px; cursor: pointer; border-bottom: 2px solid transparent;
+  }}
+  .tab-btn.active {{ color: var(--text); border-bottom-color: var(--accent); }}
+  .tab-panel {{ display: none; }}
+  .tab-panel.active {{ display: block; }}
+  iframe {{ width: 100%; height: 1700px; border: 0; border-radius: 10px; }}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Crypto Mean-Reversion Bot - Kraken Paper Ledger</h1>
+  <h1>Crypto Paper-Trading Bots</h1>
   <p class="subtitle">
-    Fully simulated paper trading against real live Kraken prices - no real order is ever placed.
-    Rebuilt automatically by GitHub Actions after every 15-minute trading run.
+    Two independent, free, rule-based paper-trading bots. Rebuilt automatically by GitHub Actions
+    after every trading run - nothing on this page depends on Claude in any way.
     Last rebuilt: <span class="local-time" data-utc="{esc(generated_at)}">{esc(generated_at)}</span>.
-    Last successful bot run: {utc_span(last_success.get('timestamp_utc'))}.
   </p>
 
-  <div class="cards">
-    <div class="card"><div class="label">Cash</div><div class="value">{fmt_money(cash)}</div></div>
-    <div class="card"><div class="label">Equity (at cost)</div><div class="value">{fmt_money(equity_at_cost)}</div></div>
-    <div class="card"><div class="label">Total return</div><div class="value {'pos' if total_return_pct >= 0 else 'neg'}">{fmt_pct(total_return_pct)}</div></div>
-    <div class="card"><div class="label">Open positions</div><div class="value">{len(positions)}</div></div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
+    <button class="tab-btn" data-tab="alpaca">Trend-Following (Alpaca)</button>
   </div>
 
-  <section>
-    <h2>Open positions</h2>
-    {build_positions_table(positions, latest_prices_note)}
-  </section>
+  <div class="tab-panel active" id="tab-kraken">
+    <p class="subtitle">
+      Fully simulated paper trading against real live Kraken prices - no real order is ever placed.
+      Last successful bot run: {utc_span(last_success.get('timestamp_utc'))}.
+    </p>
 
-  <section>
-    <h2>Live strategy parameters</h2>
-    <div class="params">
-      <div><span>Rolling window: </span>{params.get('window')} bars (15-min)</div>
-      <div><span>Trend filter window: </span>{params.get('trend_window')} bars (15-min)</div>
-      <div><span>Entry z-score: </span>{params.get('entry_zscore')}</div>
-      <div><span>Exit z-score: </span>{params.get('exit_zscore')}</div>
-      <div><span>Stop-loss: </span>{params.get('stop_loss_pct')}%</div>
-      <div><span>Take-profit: </span>{params.get('take_profit_pct')}%</div>
-      <div><span>Min confidence: </span>{params.get('min_confidence')}</div>
-      <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
-      <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
-      <div><span>Max daily loss: </span>{params.get('max_daily_loss_pct')}%</div>
+    <div class="cards">
+      <div class="card"><div class="label">Cash</div><div class="value">{fmt_money(cash)}</div></div>
+      <div class="card"><div class="label">Equity (at cost)</div><div class="value">{fmt_money(equity_at_cost)}</div></div>
+      <div class="card"><div class="label">Total return</div><div class="value {'pos' if total_return_pct >= 0 else 'neg'}">{fmt_pct(total_return_pct)}</div></div>
+      <div class="card"><div class="label">Open positions</div><div class="value">{len(positions)}</div></div>
     </div>
-  </section>
 
-  <section>
-    <h2>Recent activity (last {len(log_rows)} log rows)</h2>
-    {build_log_table(log_rows)}
-  </section>
+    <section>
+      <h2>Open positions</h2>
+      {build_positions_table(positions, latest_prices_note)}
+    </section>
+
+    <section>
+      <h2>Live strategy parameters</h2>
+      <div class="params">
+        <div><span>Rolling window: </span>{params.get('window')} bars (15-min)</div>
+        <div><span>Trend filter window: </span>{params.get('trend_window')} bars (15-min)</div>
+        <div><span>Entry z-score: </span>{params.get('entry_zscore')}</div>
+        <div><span>Exit z-score: </span>{params.get('exit_zscore')}</div>
+        <div><span>Stop-loss: </span>{params.get('stop_loss_pct')}%</div>
+        <div><span>Take-profit: </span>{params.get('take_profit_pct')}%</div>
+        <div><span>Min confidence: </span>{params.get('min_confidence')}</div>
+        <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
+        <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
+        <div><span>Max daily loss: </span>{params.get('max_daily_loss_pct')}%</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recent activity (last {len(log_rows)} log rows)</h2>
+      {build_log_table(log_rows)}
+    </section>
+  </div>
+
+  <div class="tab-panel" id="tab-alpaca">
+    <p class="subtitle">
+      Sibling bot's own live dashboard, embedded directly from its own GitHub Pages site
+      (<a href="{SIBLING_DASHBOARD_URL}" target="_blank" rel="noopener">open in a new tab</a>).
+    </p>
+    <iframe src="{SIBLING_DASHBOARD_URL}" loading="lazy" title="Trend-following bot dashboard"></iframe>
+  </div>
 
   <footer>
     Source: <a href="https://github.com/wheresej2k/crypto-mean-reversion-agent">github.com/wheresej2k/crypto-mean-reversion-agent</a>
@@ -242,6 +272,15 @@ def main():
     if (isNaN(d.getTime())) return;
     el.textContent = d.toLocaleString(undefined, {{
       year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    }});
+  }});
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {{
+    btn.addEventListener('click', function() {{
+      document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.remove('active'); }});
+      document.querySelectorAll('.tab-panel').forEach(function(p) {{ p.classList.remove('active'); }});
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     }});
   }});
 </script>

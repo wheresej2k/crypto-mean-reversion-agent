@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crypto Mean-Reversion Bot - Kraken Paper Ledger</title>
+<title>Crypto Bots - Kraken Mean-Reversion + Alpaca Trend-Following</title>
 <style>
   :root {
     color-scheme: light dark;
@@ -42,50 +42,78 @@
   footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }
   a { color: var(--accent); }
   code { background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .tab-btn {
+    background: none; border: none; color: var(--muted); font: inherit; font-weight: 600;
+    padding: 10px 4px; margin-right: 16px; cursor: pointer; border-bottom: 2px solid transparent;
+  }
+  .tab-btn.active { color: var(--text); border-bottom-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+  iframe { width: 100%; height: 1700px; border: 0; border-radius: 10px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Crypto Mean-Reversion Bot - Kraken Paper Ledger</h1>
+  <h1>Crypto Paper-Trading Bots</h1>
   <p class="subtitle">
-    Fully simulated paper trading against real live Kraken prices - no real order is ever placed.
-    Rebuilt automatically by GitHub Actions after every 15-minute trading run.
-    Last rebuilt: <span class="local-time" data-utc="2026-09-15T06:39:52.657788+00:00">2026-09-15T06:39:52.657788+00:00</span>.
-    Last successful bot run: <span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span>.
+    Two independent, free, rule-based paper-trading bots. Rebuilt automatically by GitHub Actions
+    after every trading run - nothing on this page depends on Claude in any way.
+    Last rebuilt: <span class="local-time" data-utc="2026-09-15T16:22:14.013291+00:00">2026-09-15T16:22:14.013291+00:00</span>.
   </p>
 
-  <div class="cards">
-    <div class="card"><div class="label">Cash</div><div class="value">$40,000.00</div></div>
-    <div class="card"><div class="label">Equity (at cost)</div><div class="value">$100,000.00</div></div>
-    <div class="card"><div class="label">Total return</div><div class="value pos">+0.00%</div></div>
-    <div class="card"><div class="label">Open positions</div><div class="value">4</div></div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
+    <button class="tab-btn" data-tab="alpaca">Trend-Following (Alpaca)</button>
   </div>
 
-  <section>
-    <h2>Open positions</h2>
-    <div class="table-scroll"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th><th>Stop</th><th>Target</th><th>Opened</th></tr></thead><tbody><tr><td>ETH/USD</td><td>6.022790</td><td>$2,490.54</td><td>$2,241.49</td><td>$2,615.07</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>SOL/USD</td><td>148.089644</td><td>$101.29</td><td>$91.16</td><td>$106.35</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>LINK/USD</td><td>1309.525576</td><td>$11.45</td><td>$10.31</td><td>$12.03</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>DOGE/USD</td><td>180465.890744</td><td>$0.08</td><td>$0.07</td><td>$0.09</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr></tbody></table></div><p class="muted">Position values shown are cost basis (entry price x qty) - this static page doesn't fetch live prices, so it won't show unrealized P/L. See <code>state/paper_state.json</code> in the repo, or wait for the bot's next run, for current equity.</p>
-  </section>
+  <div class="tab-panel active" id="tab-kraken">
+    <p class="subtitle">
+      Fully simulated paper trading against real live Kraken prices - no real order is ever placed.
+      Last successful bot run: <span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span>.
+    </p>
 
-  <section>
-    <h2>Live strategy parameters</h2>
-    <div class="params">
-      <div><span>Rolling window: </span>48 bars (15-min)</div>
-      <div><span>Trend filter window: </span>192 bars (15-min)</div>
-      <div><span>Entry z-score: </span>2.0</div>
-      <div><span>Exit z-score: </span>0.0</div>
-      <div><span>Stop-loss: </span>8%</div>
-      <div><span>Take-profit: </span>5%</div>
-      <div><span>Min confidence: </span>50</div>
-      <div><span>Max position size: </span>15% of equity</div>
-      <div><span>Max total exposure: </span>75%</div>
-      <div><span>Max daily loss: </span>5%</div>
+    <div class="cards">
+      <div class="card"><div class="label">Cash</div><div class="value">$40,000.00</div></div>
+      <div class="card"><div class="label">Equity (at cost)</div><div class="value">$100,000.00</div></div>
+      <div class="card"><div class="label">Total return</div><div class="value pos">+0.00%</div></div>
+      <div class="card"><div class="label">Open positions</div><div class="value">4</div></div>
     </div>
-  </section>
 
-  <section>
-    <h2>Recent activity (last 30 log rows)</h2>
-    <div class="table-scroll"><table><thead><tr><th>Time</th><th>Symbol</th><th>Action</th><th>Status</th><th>Amount</th><th>Reasoning</th></tr></thead><tbody><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.42 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.39 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.50 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.29 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.40 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.42 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.39 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.50 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.29 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.40 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.19 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.09 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.28 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.07 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.19 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>DOGE/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($0.0831) is 1.54 standard deviations below its 12h average ($0.0841) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>LINK/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($11.4545) is 1.65 standard deviations below its 12h average ($11.6032) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>SOL/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($101.2900) is 1.76 standard deviations below its 12h average ($102.6650) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>ETH/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($2490.5400) is 1.66 standard deviations below its 12h average ($2525.6633) - likely oversold, buying the dip</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.45 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is +0.14 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is +2.08 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.43 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.13 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.87 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.20 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.19 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.06 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.52 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.97 standard deviations from its 12h average - no actionable signal</td></tr></tbody></table></div>
-  </section>
+    <section>
+      <h2>Open positions</h2>
+      <div class="table-scroll"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th><th>Stop</th><th>Target</th><th>Opened</th></tr></thead><tbody><tr><td>ETH/USD</td><td>6.022790</td><td>$2,490.54</td><td>$2,241.49</td><td>$2,615.07</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>SOL/USD</td><td>148.089644</td><td>$101.29</td><td>$91.16</td><td>$106.35</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>LINK/USD</td><td>1309.525576</td><td>$11.45</td><td>$10.31</td><td>$12.03</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr><tr><td>DOGE/USD</td><td>180465.890744</td><td>$0.08</td><td>$0.07</td><td>$0.09</td><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td></tr></tbody></table></div><p class="muted">Position values shown are cost basis (entry price x qty) - this static page doesn't fetch live prices, so it won't show unrealized P/L. See <code>state/paper_state.json</code> in the repo, or wait for the bot's next run, for current equity.</p>
+    </section>
+
+    <section>
+      <h2>Live strategy parameters</h2>
+      <div class="params">
+        <div><span>Rolling window: </span>48 bars (15-min)</div>
+        <div><span>Trend filter window: </span>192 bars (15-min)</div>
+        <div><span>Entry z-score: </span>2.0</div>
+        <div><span>Exit z-score: </span>0.0</div>
+        <div><span>Stop-loss: </span>8%</div>
+        <div><span>Take-profit: </span>5%</div>
+        <div><span>Min confidence: </span>50</div>
+        <div><span>Max position size: </span>15% of equity</div>
+        <div><span>Max total exposure: </span>75%</div>
+        <div><span>Max daily loss: </span>5%</div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recent activity (last 30 log rows)</h2>
+      <div class="table-scroll"><table><thead><tr><th>Time</th><th>Symbol</th><th>Action</th><th>Status</th><th>Amount</th><th>Reasoning</th></tr></thead><tbody><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.42 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.39 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.50 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.29 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:34:52+00:00">2026-09-15T06:34:52+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.40 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.42 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.39 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.50 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.29 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:31:35+00:00">2026-09-15T06:31:35+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.40 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.19 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.09 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.28 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.07 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T06:29:52+00:00">2026-09-15T06:29:52+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.19 standard deviations from its 48-bar average - no actionable signal</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>DOGE/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($0.0831) is 1.54 standard deviations below its 12h average ($0.0841) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>LINK/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($11.4545) is 1.65 standard deviations below its 12h average ($11.6032) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>SOL/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($101.2900) is 1.76 standard deviations below its 12h average ($102.6650) - likely oversold, buying the dip</td></tr><tr class="row-buy"><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>ETH/USD</td><td>BUY</td><td>executed</td><td>15000.0</td><td>price ($2490.5400) is 1.66 standard deviations below its 12h average ($2525.6633) - likely oversold, buying the dip</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T05:55:47+00:00">2026-09-15T05:55:47+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.45 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is +0.14 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is +2.08 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.43 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.13 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T02:03:47+00:00">2026-09-15T02:03:47+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.87 standard deviations from its 12-bar average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>DOGE/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -1.20 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>LINK/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.19 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>SOL/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.06 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>ETH/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.52 standard deviations from its 12h average - no actionable signal</td></tr><tr class=""><td><span class="local-time" data-utc="2026-09-15T00:55:34+00:00">2026-09-15T00:55:34+00:00 UTC</span></td><td>BTC/USD</td><td>HOLD</td><td>skipped</td><td></td><td>price is -0.97 standard deviations from its 12h average - no actionable signal</td></tr></tbody></table></div>
+    </section>
+  </div>
+
+  <div class="tab-panel" id="tab-alpaca">
+    <p class="subtitle">
+      Sibling bot's own live dashboard, embedded directly from its own GitHub Pages site
+      (<a href="https://wheresej2k.github.io/crypto-trading-agent/" target="_blank" rel="noopener">open in a new tab</a>).
+    </p>
+    <iframe src="https://wheresej2k.github.io/crypto-trading-agent/" loading="lazy" title="Trend-following bot dashboard"></iframe>
+  </div>
 
   <footer>
     Source: <a href="https://github.com/wheresej2k/crypto-mean-reversion-agent">github.com/wheresej2k/crypto-mean-reversion-agent</a>
@@ -100,6 +128,15 @@
     if (isNaN(d.getTime())) return;
     el.textContent = d.toLocaleString(undefined, {
       year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+  });
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
     });
   });
 </script>
