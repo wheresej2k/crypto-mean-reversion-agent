@@ -1,0 +1,13 @@
+{
+  "_comment": "Tunable strategy/risk knobs. NOT secret - committed to git on purpose so the monthly auto-retune workflow can propose changes here as a reviewable pull request diff. See README.md for what each field means. Validated by tune.py 2026-09-14 (729-combination grid search against ~5 years of real hourly Alpaca crypto data): 315 of 729 passed the safety filter (drawdown <=32%, win rate >=35% in every window); this combo had the highest average return across the three test windows (~3mo/~1yr/~5yr) among safe candidates. exit_zscore ties across -0.5/0/0.5 for this combo - the 5% take-profit consistently triggers before the z-score-based reversion exit would, so it isn't the binding exit condition here; kept at -0.5 as the more conservative of the tied values.",
+  "window": 12,
+  "entry_zscore": 1.5,
+  "exit_zscore": -0.5,
+  "stop_loss_pct": 10,
+  "take_profit_pct": 5,
+  "min_confidence": 50,
+  "max_position_pct": 15,
+  "max_total_exposure_pct": 75,
+  "max_daily_loss_pct": 5,
+  "max_trades_per_run": 5
+}

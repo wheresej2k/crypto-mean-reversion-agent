@@ -1,0 +1,35 @@
+name: Crypto mean-reversion bot watchdog
+
+on:
+  schedule:
+    # Hourly at :50, offset from the trading job's :05 so it isn't checking mid-run. Runs
+    # independently of the hourly-trade workflow on purpose - if THAT workflow's schedule
+    # silently fails to fire (a real, confirmed GitHub Actions failure mode - see the sibling
+    # crypto-trading-agent project's history), this one still runs and notices, because it
+    # doesn't depend on the same trigger.
+    - cron: "50 * * * *"
+  workflow_dispatch: {}
+
+env:
+  # 2 hours means roughly "2 consecutive misses" gets caught, not just a sustained multi-hour
+  # outage - same threshold the sibling bot settled on after a real missed-run incident.
+  WATCHDOG_ALERT_AFTER_HOURS: "2"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # No pip install needed - watchdog.py and heartbeat.py only use the Python standard
+      # library, deliberately, so this check has as few ways to fail as possible.
+      - name: Check for a missed run
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          PHONE_MMS_ADDRESS: ${{ secrets.PHONE_MMS_ADDRESS }}
+        run: python watchdog.py

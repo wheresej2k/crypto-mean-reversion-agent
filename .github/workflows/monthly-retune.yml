@@ -1,0 +1,48 @@
+name: Monthly strategy retune (proposal only)
+
+on:
+  schedule:
+    - cron: "0 6 1 * *"   # 06:00 UTC on the 1st of each month
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
+
+jobs:
+  retune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Re-runs tune.py's safety-filtered sweep against fresh history and, only if a different
+      # combination now passes the safety bar and scores best, rewrites config/params.json in
+      # this checkout. Never commits, pushes, or merges anything itself - see auto_retune.py.
+      - name: Re-run the safety-filtered parameter sweep against fresh history
+        run: python auto_retune.py
+
+      # SAFETY GATE: this only opens a pull request - it never merges one. `add-paths` restricts
+      # it to config/params.json specifically, so it does nothing at all (no PR, no branch) if
+      # that file didn't change. The proposed parameters do not take effect on the live hourly
+      # bot until a human reviews retune_summary.md's backtest numbers and merges the PR.
+      - name: Open a pull request if a better safe combination was found
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "Propose retuned strategy parameters"
+          branch: auto-retune/${{ github.run_number }}
+          title: "Monthly retune: proposed strategy parameter update"
+          body-path: retune_summary.md
+          add-paths: config/params.json
+          labels: automated-retune

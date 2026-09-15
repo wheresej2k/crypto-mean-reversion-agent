@@ -1,0 +1,74 @@
+name: Hourly crypto mean-reversion paper trade
+
+on:
+  schedule:
+    # :05 past every hour. Crypto trades 24/7, so there's no market-hours window to land inside -
+    # the 5-minute offset just avoids the top-of-the-hour traffic spike GitHub's own docs warn can
+    # delay jobs, and gives the hourly bar a moment to finalize on Alpaca's side before we fetch it.
+    - cron: "5 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+env:
+  ALPACA_API_KEY: ${{ secrets.ALPACA_API_KEY }}
+  ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+  # Your choice, not something tune.py/auto_retune.py ever touches. Strategy/risk parameters
+  # live in config/params.json instead - see README for why they're kept separate.
+  WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
+  # Which UTC hour gets the once-a-day MMS summary (texting every single hourly run would be
+  # spam - especially for this bot, which trades far more often than the sibling trend bot).
+  DAILY_SUMMARY_HOUR_UTC: "13"
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install system fonts (for the summary image)
+        run: sudo apt-get update && sudo apt-get install -y fonts-dejavu-core
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run trading bot
+        run: python trader.py
+
+      - name: Check if it's time for the once-a-day summary text
+        id: check_hour
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" = "$DAILY_SUMMARY_HOUR_UTC" ]; then
+            echo "is_summary_time=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_summary_time=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Text the daily summary image to phone
+        if: steps.check_hour.outputs.is_summary_time == 'true'
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          PHONE_MMS_ADDRESS: ${{ secrets.PHONE_MMS_ADDRESS }}
+        run: python notify.py
+
+      - name: Commit updated trade log and state
+        run: |
+          git config user.name "crypto-mean-reversion-bot"
+          git config user.email "actions@users.noreply.github.com"
+          # logs/*.csv is gitignored (keeps local dry-run test logs out of git on your own
+          # machine) - -f explicitly overrides that just for the real trade log. state/ files
+          # aren't gitignored but may not exist yet on a brand-new repo's first run.
+          for f in logs/trade_log.csv state/open_brackets.json state/last_success.json; do
+            if [ -f "$f" ]; then
+              git add -f "$f"
+            fi
+          done
+          git diff --cached --quiet || git commit -m "Update trade log and state [skip ci]"
+          git push
