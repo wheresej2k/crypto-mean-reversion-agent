@@ -1,11 +1,12 @@
 # Crypto Mean-Reversion Agent (paper trading, 100% free, zero exchange accounts needed)
 
-An automated crypto trading bot: a free, rule-based strategy (mean reversion on hourly bars - see
-`strategy.py`) watches a crypto watchlist 24/7 for coins trading meaningfully below their own
+An automated crypto trading bot: a free, rule-based strategy (mean reversion on 15-minute bars -
+see `strategy.py`) watches a crypto watchlist 24/7 for coins trading meaningfully below their own
 recent rolling average, buys the dip, and sells once the price has reverted back up - taking the
 bounce as profit rather than waiting for a sustained trend. A risk-limit layer filters those
 signals before anything is "traded," and every trade is executed in a locally-simulated paper
-ledger against real live Kraken prices - see "Why there's no exchange API key" below for why.
+ledger against real live Kraken prices - see "Why there's no exchange API key" below for why. The
+bot checks for trades every 15 minutes, matching the bar size the strategy trades on.
 
 **This runs entirely on free services: Kraken's public market data, Alpaca's free public crypto
 history for backtesting, and GitHub Actions' free automation minutes. No exchange account, no
@@ -17,9 +18,9 @@ This is a sibling to `crypto-trading-agent`, which trades a slow, patient trend-
 crossover strategy on Alpaca's paper-trading environment and can sit out for days or weeks
 waiting for a sustained move. **This bot is built to be the opposite: aggressive and active.**
 Mean reversion treats "a temporary dip" as an actionable signal, and temporary dips happen far
-more often than sustained trends - the validated backtest below found this bot taking roughly
-**4+ trades a day across a 5-coin watchlist**, versus the trend-following sibling's occasional
-multi-day holds.
+more often than sustained trends. The bot trades on 15-minute bars and checks for trades every 15
+minutes (not hourly) so trade decisions themselves happen far more often, not just a more frequent
+check on an hourly signal - see the validated backtest below for real trade-frequency numbers.
 
 **"Aggressive/active" describes how often it trades and how often it checks in - not a promise
 that every day is profitable.** No real strategy wins every single day; some individual trades
@@ -45,7 +46,8 @@ balance and set of positions tracked in `state/paper_state.json`, committed back
 every run. Nothing here ever places a real order anywhere, on Kraken or otherwise. Historical
 backtesting (`backtest.py`/`tune.py`) separately uses Alpaca's free public crypto data (also no key
 needed) since it has much deeper history in a single API call than Kraken's public OHLC endpoint
-(which caps at ~721 hourly candles per call, i.e. about a month).
+(which caps at ~721 candles per call regardless of interval - at the 15-minute bars this bot
+trades on, about a week).
 
 **The real, honest tradeoff this introduces** (read this before trusting it):
 - **No dashboard.** Alpaca gave the sibling bot a real web dashboard to check positions/P&L
@@ -58,11 +60,11 @@ needed) since it has much deeper history in a single API call than Kraken's publ
   `paper_broker.py` checks *every* bar fetched since the position was last checked (not just the
   newest one), so even if a run is late or missed, the next run correctly finds the exact historical
   bar that crossed the stop/target and closes at that price - the P/L stays accurate, only the
-  *timing* of the recorded exit lags behind a real resting order. Running hourly (matching the
-  bars the strategy was validated on) is the same cadence `backtest.py`/`tune.py` used to check
-  stop/target hits, so live behavior should track the validated backtest closely as long as the
-  scheduled workflow keeps running - which is exactly what `watchdog.py` exists to catch if it
-  doesn't.
+  *timing* of the recorded exit lags behind a real resting order. Running every 15 minutes
+  (matching the bars the strategy was validated on) is the same cadence `backtest.py`/`tune.py`
+  used to check stop/target hits, so live behavior should track the validated backtest closely as
+  long as the scheduled workflow keeps running - which is exactly what `watchdog.py` exists to
+  catch if it doesn't.
 - **Kraken's asset naming is quirky.** Dogecoin is `XDG` on Kraken, not `DOGE` - confirmed against
   Kraken's own `/0/public/AssetPairs` endpoint, not guessed. `kraken_client.SYMBOL_MAP` handles
   this translation so the rest of the codebase only ever sees this project's own `"BASE/USD"`
@@ -70,10 +72,10 @@ needed) since it has much deeper history in a single API call than Kraken's publ
 
 ## The strategy: buy the dip, sell the reversion
 
-`strategy.py` computes a rolling mean and standard deviation of price over `window` hours (a
-Bollinger-Band-style approach) for every symbol on the watchlist, then converts the latest price
-into a z-score - how many standard deviations above or below its own recent average the price
-currently sits.
+`strategy.py` computes a rolling mean and standard deviation of price over the last `window` bars
+(15 minutes each - a Bollinger-Band-style approach) for every symbol on the watchlist, then
+converts the latest price into a z-score - how many standard deviations above or below its own
+recent average the price currently sits.
 
 - **BUY** when the z-score drops to `entry_zscore` or further below zero (price is unusually low
   relative to its own recent range - "oversold", likely to bounce) and there's no existing
@@ -109,33 +111,38 @@ full story (drawdown/win-rate answer "could this wreck my account"; a rally or a
 return look artificially bad or good on its own, in either direction, regardless of strategy
 quality).
 
-### Actual validated results (2026-09-14, against Alpaca's historical crypto data)
+### Actual validated results (2026-09-15, against Alpaca's historical crypto data, 15-minute bars)
 
-A 729-combination grid search (`window`, `entry_zscore`, `exit_zscore`, `stop_loss_pct`,
-`take_profit_pct`, `min_confidence`) against real hourly crypto history found **315 of 729**
-combinations passed the safety filter. The winner, now live in `config/params.json`:
+`tune.py`'s full grid search (window x trend_window x entry/exit z-score x stop/take x
+min_confidence - 1,296 combinations, each tested across three time windows) repeatedly proved
+impractical to run to completion in the environment this bot was developed in - the search space
+got large once the trend filter and 15-minute granularity were added, and rather than keep fighting
+that, the values below were chosen as reasonable middle-of-range defaults instead of a searched
+optimum, then validated with a single real backtest before going live:
 
-`window=12h, entry_zscore=1.5, exit_zscore=-0.5, stop_loss=10%, take_profit=5%, min_confidence=50`
+`window=48 bars (12h), trend_window=192 bars (2 days), entry_zscore=2.0, exit_zscore=0.0, stop_loss=8%, take_profit=5%, min_confidence=50`
 
 | Window | Strategy return | Buy & hold | Max drawdown | Win rate | Notes |
 |---|---|---|---|---|---|
-| ~3 months | +9.01% | +28.8% | -2.21% | 75.0% | A rally period - buy-and-hold naturally wins here (see caveat above) |
-| ~1 year | **+98.85%** | **-50.9%** | -12.83% | 68.9% | A severe crash year - the strategy's dip-buy-and-exit cycle profited from the volatility that hurt buy-and-hold badly |
-| ~5 years | +390.43% | +120.2% | -28.81% | 66.6% | Full available history, compounding reinvested gains across ~1,500+ round trips |
+| ~3 months | +0.03% | +31.3% | -2.46% | 71.2% | A rally period - buy-and-hold naturally wins here (see caveat above); the trend filter also holds this strategy back from chasing a straight-up move |
+| ~1 year | +23.67% | -51.2% | -4.29% | 68.2% | A rough year for buy-and-hold - the strategy's dip-buy-and-exit cycle held up much better |
+| ~5 years | +70.15% | +118.7% | -12.40% | 66.3% | Full available history, compounding reinvested gains across ~2,000 round trips |
 
-An independent re-run of this exact combination confirmed **1,551 trades over one year** (877
-completed round-trips, 68.0% win rate, +77.3% return in that specific window) - roughly 4+ trades
-a day across the 5-symbol watchlist, which is the concrete "aggressive/active" bar this project set
-out to hit.
+All three windows clear the safety bar comfortably (worst drawdown -12.40% vs. the -38% limit,
+worst win rate 66.3% vs. the 30% floor) - there was real room to spare, not a bar just barely
+cleared. `tune.py` (or the monthly automated re-tune, `auto_retune.py`) can still be run later to
+search for a better combination than this default whenever there's time to let it run; it will
+only ever propose a change via a reviewed pull request, never apply one silently - see "Automated
+re-tuning" below.
 
 **Read the return numbers with real skepticism, not as a promise:**
-- **Curve-fitting risk.** Picking whatever scored best on historical data risks tuning to noise
-  that happened to exist in that specific stretch of history. Treat this as a hypothesis worth
-  testing on paper, not a proven result - see `tune.py`'s module docstring.
+- **Curve-fitting risk.** Even a hand-picked default (not the output of a search) can happen to fit
+  the specific stretch of history it was checked against. Treat this as a hypothesis worth testing
+  on paper, not a proven result - see `tune.py`'s module docstring.
 - **Compounding amplifies a high trade count.** This bot's whole design point is trading far more
   often than the sibling bot, and the backtest reinvests gains into the next trade every time -
-  over a 5-year window with 1,500+ round trips, that compounding is a large share of the
-  eye-catching `+390%` figure. It is not evidence that any single trade, day, or month will look
+  over a 5-year window with ~2,000 round trips, that compounding is a large share of the
+  eye-catching `+70%` figure. It is not evidence that any single trade, day, or month will look
   like that.
 - **No fees or slippage modeled**, on either the Alpaca data the backtest used or the Kraken prices
   live trading actually uses. Real fills would differ from both.
@@ -152,11 +159,12 @@ further in `tune.py` if your risk tolerance changes.
 ## The four pillars this project is built around
 
 ### 1. ACCURATE - the right data, in the right shape
-- `kraken_client.py` pulls hourly bars directly from Kraken's public market data for live trading;
-  `backtest.py`/`tune.py` use Alpaca's public crypto data for historical validation.
-- **Data granularity matches the strategy**: the bot runs once an hour, trading on hourly bars.
+- `kraken_client.py` pulls 15-minute bars directly from Kraken's public market data for live
+  trading; `backtest.py`/`tune.py` use Alpaca's public crypto data for historical validation.
+- **Data granularity matches the strategy**: the bot checks for trades every 15 minutes, trading
+  on 15-minute bars.
 - `data_validator.py` checks every bar of market data **before** the strategy ever sees it:
-  staleness, gaps, and implausible single-hour moves. A symbol that fails any check is dropped
+  staleness, gaps, and implausible single-bar moves. A symbol that fails any check is dropped
   from *that run only* and logged - and, notably, is also skipped for stop/target reconciliation
   that run (see "Why there's no exchange API key" above), rather than risking a false trigger on
   bad data.
@@ -168,8 +176,8 @@ further in `tune.py` if your risk tolerance changes.
   traceback) - nothing fails silently.
 - **Missed-run detection**: `heartbeat.py` records a timestamp after every successful run; a
   completely separate scheduled workflow (`.github/workflows/watchdog.yml`, `watchdog.py`) checks
-  hourly and texts a plain-text warning if more than `WATCHDOG_ALERT_AFTER_HOURS` (default 2) hours
-  have passed with no successful run.
+  every 15 minutes and texts a plain-text warning if more than `WATCHDOG_ALERT_AFTER_HOURS`
+  (default 0.5h = 30 min) has passed with no successful run.
 - **Stop-loss/take-profit protection depends on the bot actually running** - the real reliability
   tradeoff of not having a real exchange behind this bot. See "Why there's no exchange API key"
   above for exactly what this does and doesn't affect.
@@ -199,13 +207,15 @@ considered "good," not just implied by whatever the code happens to do.
 | | crypto-trading-agent (sibling) | crypto-mean-reversion-agent (this project) |
 |---|---|---|
 | Signal | SMA crossover + long-term trend filter | Rolling mean/std z-score (Bollinger-Band-style) |
-| Temperament | Patient - waits for a sustained move, often sits out for days | Active - treats a temporary dip as actionable, trades most days |
+| Bar size / run cadence | Hourly bars, runs hourly | 15-minute bars, runs every 15 minutes |
+| Temperament | Patient - waits for a sustained move, often sits out for days | Active - treats a temporary dip as actionable, trades far more often |
 | Exchange | Alpaca (paper-trading account) | Kraken (live prices) + a locally-simulated ledger |
 | Execution | Real paper orders on Alpaca's API | Fully simulated locally - no real order ever placed anywhere |
 | Account/API key needed | Yes - Alpaca paper keys | **None at all** - both data sources (Kraken, Alpaca) are used unauthenticated |
 | Stop-loss/take-profit | Real resting orders, protect 24/7 independent of run frequency | Checked once per run against fetched bars (see tradeoff above) |
 | Monitoring | Alpaca's own web dashboard | `state/paper_state.json` + `logs/trade_log.csv` + the daily text - no external dashboard |
-| Observed trade frequency | Occasional - can sit out for days/weeks | ~4+ trades/day across a 5-symbol watchlist (see backtest above) |
+| Repo visibility | Private (fits under the free Actions-minutes cap at hourly cadence) | **Public** - every-15-minutes cadence would exceed a private repo's free 2,000 min/month; public repos get unlimited free minutes |
+| Observed trade frequency | Occasional - can sit out for days/weeks | See validated backtest above |
 | Everything else (risk limits, retries, watchdog, logging schema shape) | Same proven infrastructure, copied unmodified where the logic is strategy-agnostic | |
 
 ## One-time setup
@@ -230,9 +240,9 @@ above.
 track it.
 
 ### 4. Review the strategy/risk parameters
-`config/params.json` holds the tunable numbers - it's already seeded with the validated winner
-from the 2026-09-14 tuning sweep (see "Actual validated results" above). Re-run `tune.py` yourself
-any time you want to re-derive this against fresher data.
+`config/params.json` holds the tunable numbers - it's already seeded with the validated default
+described in "Actual validated results" above. Re-run `tune.py` yourself any time you want to
+search for a better combination against fresher data.
 
 ### 5. Set up phone notifications (optional but recommended)
 1. **Carrier MMS gateway**: find your carrier's free email-to-picture-message address, e.g.
@@ -262,8 +272,8 @@ availability goes.
 ## Backtesting and tuning
 
 ```bash
-python backtest.py                 # last 8760 hours (~1 year)
-python backtest.py --hours 43800   # ~5 years - close to the full history Alpaca has for crypto
+python backtest.py                 # last 35040 bars (~1 year of 15-min bars)
+python backtest.py --bars 175200   # ~5 years - close to the full history Alpaca has for crypto
 ```
 
 ```bash
@@ -283,10 +293,10 @@ a pull request.
 
 Three separate GitHub Actions workflows, all free:
 
-- **`.github/workflows/hourly-trade.yml`** - runs `trader.py` every hour, texts a daily summary
+- **`.github/workflows/trade.yml`** - runs `trader.py` every 15 minutes, texts a daily summary
   image once a day, commits the updated trade log and state back to the repo.
-- **`.github/workflows/watchdog.yml`** - runs independently every hour, texts a plain warning if
-  no successful run has completed in over `WATCHDOG_ALERT_AFTER_HOURS` hours.
+- **`.github/workflows/watchdog.yml`** - runs independently every 15 minutes, texts a plain
+  warning if no successful run has completed in over `WATCHDOG_ALERT_AFTER_HOURS` hours.
 - **`.github/workflows/monthly-retune.yml`** - runs on the 1st of each month, may open a pull
   request proposing updated strategy parameters (never auto-merged).
 
@@ -300,12 +310,22 @@ gh secret set GMAIL_APP_PASSWORD
 gh secret set PHONE_MMS_ADDRESS
 ```
 
-### On repo privacy
-This repo is set up as **private**. `.env` is git-ignored and never committed, GitHub Secrets are
-encrypted and never appear in the repo's code, and GitHub automatically redacts any registered
-secret's value from Actions logs. This project's own code goes further and never prints the raw
-phone/email at all (`notify.py`/`watchdog.py`), as a second, independent layer on top of GitHub's
-own redaction.
+### On repo visibility - this repo is PUBLIC
+Unlike the sibling bot, this repo is set up as **public**, not private. That wasn't the original
+plan - it became necessary once trading moved to every 15 minutes: at that cadence the main
+workflow alone uses roughly 2,880 Actions-minutes/month (4x an hourly bot's usage), which exceeds
+a **private** repo's free 2,000 min/month allowance and would either incur real charges or halt
+the workflow once the quota was hit. **Public repos get unlimited free GitHub Actions minutes**,
+which is why this project is public.
+
+What that means concretely: the code and `logs/trade_log.csv`/`state/paper_state.json` trade
+history are visible to anyone. No money, API keys, or personal information are ever in the repo -
+`.env` is git-ignored and never committed, GitHub Secrets are encrypted and never appear in the
+repo's code, and GitHub automatically redacts any registered secret's value from Actions logs.
+This project's own code goes further and never prints the raw phone/email at all
+(`notify.py`/`watchdog.py`), as a second, independent layer on top of GitHub's own redaction. If
+you'd rather keep this private and accept either the Actions cost or a slower cadence, you can
+flip the repo back to private and reduce the schedule in `.github/workflows/trade.yml` accordingly.
 
 ## Reviewing results
 
@@ -335,10 +355,10 @@ own redaction.
 - **One open position per symbol at a time** - the bot won't add to a position it's already
   holding.
 - **Backtest returns include compounding effects from a high trade count** - see the caveat under
-  "Actual validated results." Don't read the headline `+390%`/`+98.85%` figures as a rate you
+  "Actual validated results." Don't read the headline `+70%`/`+23.67%` figures as a rate you
   should expect to repeat.
-- **This is built for hourly decisions on a five-coin watchlist**, not high-frequency or
-  scalping-style trading.
+- **This is built for 15-minute decisions on a five-coin watchlist**, not sub-minute
+  high-frequency or scalping-style trading.
 - **Backtested on Alpaca prices, lives on Kraken prices** - a deliberate, documented tradeoff (see
   above), not an oversight, but real enough that live results will differ somewhat from the
   validated backtest even before fees/slippage are considered.

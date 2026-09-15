@@ -33,6 +33,7 @@ PARAMS_PATH = Path(__file__).parent / "config" / "params.json"
 
 REQUIRED_PARAM_KEYS = [
     "window",
+    "trend_window",
     "entry_zscore",
     "exit_zscore",
     "stop_loss_pct",
@@ -56,6 +57,7 @@ def _require(name: str) -> str:
 class Settings:
     watchlist: list[str]
     window: int
+    trend_window: int
     entry_zscore: float
     exit_zscore: float
     stop_loss_pct: float
@@ -91,6 +93,7 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
     return Settings(
         watchlist=watchlist,
         window=int(params["window"]),
+        trend_window=int(params["trend_window"]),
         entry_zscore=float(params["entry_zscore"]),
         exit_zscore=float(params["exit_zscore"]),
         stop_loss_pct=float(params["stop_loss_pct"]),

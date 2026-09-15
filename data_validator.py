@@ -2,9 +2,9 @@
 trading on bad data. Three checks:
 
 - staleness: is the most recent bar actually recent, or did the data feed silently stop updating?
-- gaps: are there missing hourly bars in the middle of the window (a dropped bar can shift the
+- gaps: are there missing 15-minute bars in the middle of the window (a dropped bar can shift the
   moving averages without anyone noticing)?
-- bad values: enough history for the long SMA window, no non-positive/NaN closes, no single-bar
+- bad values: enough history for the rolling window, no non-positive/NaN closes, no single-bar
   move so extreme it's more likely a data glitch than a real crypto price move.
 
 A symbol that fails any check is dropped from THIS run only (not the whole bot) and the reason is
@@ -17,9 +17,11 @@ from datetime import datetime, timezone
 
 from models import Bar
 
-MAX_STALENESS_HOURS = 2.5  # a bit over 2x the hourly run cadence - one missed bar is tolerated
-MAX_GAP_HOURS = 2.5
-MAX_SINGLE_BAR_MOVE_PCT = 40.0  # a bigger single-hour move than this is more likely bad data
+# Scaled down from the sibling hourly bot's 2.5h thresholds to match this bot's 15-minute bars -
+# roughly 3x the run cadence, tolerating one missed bar plus normal fetch latency.
+MAX_STALENESS_HOURS = 0.75
+MAX_GAP_HOURS = 0.75
+MAX_SINGLE_BAR_MOVE_PCT = 40.0  # a bigger single-bar move than this is more likely bad data
 
 
 @dataclass

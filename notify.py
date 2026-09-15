@@ -1,7 +1,7 @@
 """Builds a simple summary image (gain/loss, equity, today's activity, current holdings) and
 texts it to the user's phone as an MMS, via their carrier's email-to-picture-message gateway and
-Gmail SMTP. Free - no SMS API or subscription involved. Run this after trader.py in the hourly CI
-workflow (see .github/workflows/hourly-trade.yml) - since this bot trades far more often than the
+Gmail SMTP. Free - no SMS API or subscription involved. Run this after trader.py in the every-
+15-minutes CI workflow (see .github/workflows/trade.yml) - since this bot trades far more often than the
 sibling trend-following bot, "today's activity" here will typically show more rows.
 
 Crypto-specific difference from a stock bot's notify.py: no "market was closed today" branch -
@@ -143,7 +143,7 @@ def main():
     latest_prices = {}
     for symbol in settings.watchlist:
         try:
-            latest_prices[symbol] = kraken_client.get_recent_bars(symbol, hours=1)[-1].close
+            latest_prices[symbol] = kraken_client.get_recent_bars(symbol, bars=1)[-1].close
         except Exception as e:
             print(f"  WARNING: could not fetch latest price for {symbol}: {e}")
 

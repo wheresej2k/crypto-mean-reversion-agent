@@ -1,12 +1,23 @@
-"""Free, rule-based trade signal generator: mean reversion, adapted for hourly crypto bars.
+"""Free, rule-based trade signal generator: mean reversion, adapted for crypto bars. Trades on
+15-minute bars (see kraken_client.BAR_MINUTES) rather than hourly, so trade decisions themselves
+happen roughly every 15 minutes, not just a more frequent check on an hourly signal - window/
+entry_zscore/exit_zscore in config/params.json are tuned against this same granularity.
 
 Unlike crypto-trading-agent's trend-following crossover (which waits for a sustained move and
 often sits out for days), this strategy watches each coin's rolling average price and its typical
-recent range (a Bollinger-Band-style approach: a rolling mean and standard deviation over
-`window` hours). It buys when price drops meaningfully BELOW that range (a "dip", likely to snap
+recent range (a Bollinger-Band-style approach: a rolling mean and standard deviation over the last
+`window` bars). It buys when price drops meaningfully BELOW that range (a "dip", likely to snap
 back) and sells once price has reverted back up near/above the average - taking the reversion as
 profit rather than waiting for a trend. This naturally generates far more trade opportunities than
 trend-following, since "a temporary dip" happens much more often than "a sustained multi-day move".
+
+Trend filter (added 2026-09-15, borrowed from the sibling trend-following bot's own fix for the
+same problem): a BUY only fires if price is ALSO above a much longer moving average
+(`trend_window`, well beyond the reversion `window`). A "dip" during a real crash just keeps
+falling - buying every dip on the way down repeatedly gets stopped out. The trend filter sits the
+bot out in cash during a confirmed downtrend instead, which should improve both safety (avoids the
+worst dip-buys) and returns (avoids paying the stop-loss repeatedly on a falling knife). It never
+blocks a SELL/exit - only new entries, same as the sibling bot's version.
 
 The stop-loss/take-profit levels (see paper_broker.py's locally-simulated ledger - Kraken has no
 spot paper-trading sandbox, so this project trades on real Kraken prices against a local virtual
@@ -21,7 +32,8 @@ Two entry points share one decision core (decide()), same pattern as the sibling
 - generate_signals(): live use, one decision per symbol from the latest bars.
 - rolling_mean_std_series() + decide(): backtest.py/tune.py precompute the whole rolling
   mean/stddev history for each symbol in one O(n) pass (running sum and running sum-of-squares,
-  not "resum the window every hour") so a multi-year hourly sweep stays fast.
+  not "resum the window every bar") so a multi-year 15-minute-bar sweep stays fast despite being
+  4x more timesteps than an equivalent hourly sweep.
 """
 import math
 from dataclasses import dataclass
@@ -79,32 +91,44 @@ def decide(
     window: int,
     entry_zscore: float,
     exit_zscore: float,
+    trend_ok: bool = True,
 ) -> TradeDecision:
+    """`trend_ok` is the long-term trend filter's verdict (price above the trend_window average) -
+    defaults to True so existing callers that don't pass it behave exactly as before. It only ever
+    blocks a BUY; a SELL/exit fires on the reversion signal alone regardless of trend_ok.
+    """
     if std <= 0 or math.isnan(std):
         return TradeDecision(
             symbol, "HOLD", 100.0, 0.0,
-            f"not enough price variation in the last {window}h to compute a reliable signal",
+            f"not enough price variation in the last {window} bars to compute a reliable signal",
             mean, 0.0,
         )
 
     zscore = (price - mean) / std
     confidence = min(100.0, abs(zscore) * CONFIDENCE_SCALE)
 
-    if zscore <= -entry_zscore and not has_position:
+    if zscore <= -entry_zscore and not has_position and trend_ok:
         action = "BUY"
         reasoning = (
-            f"price (${price:.4f}) is {abs(zscore):.2f} standard deviations below its {window}h "
+            f"price (${price:.4f}) is {abs(zscore):.2f} standard deviations below its {window}-bar "
             f"average (${mean:.4f}) - likely oversold, buying the dip"
+        )
+    elif zscore <= -entry_zscore and not has_position and not trend_ok:
+        action = "HOLD"
+        confidence = 0.0
+        reasoning = (
+            f"price is {abs(zscore):.2f} standard deviations below its {window}-bar average - a dip, "
+            f"but price is below the long-term trend filter - sitting out a confirmed downtrend"
         )
     elif zscore >= exit_zscore and has_position:
         action = "SELL"
         reasoning = (
             f"price (${price:.4f}) has reverted to {zscore:+.2f} standard deviations vs its "
-            f"{window}h average (${mean:.4f}) - taking the reversion, exiting position"
+            f"{window}-bar average (${mean:.4f}) - taking the reversion, exiting position"
         )
     else:
         action = "HOLD"
-        reasoning = f"price is {zscore:+.2f} standard deviations from its {window}h average - no actionable signal"
+        reasoning = f"price is {zscore:+.2f} standard deviations from its {window}-bar average - no actionable signal"
 
     return TradeDecision(symbol, action, 100.0, confidence, reasoning, mean, zscore)
 
@@ -115,6 +139,7 @@ def generate_signals(
     window: int,
     entry_zscore: float,
     exit_zscore: float,
+    trend_window: int,
 ) -> list[TradeDecision]:
     decisions = []
     for symbol, bars in bars_by_symbol.items():
@@ -124,6 +149,9 @@ def generate_signals(
         variance = max(0.0, sum(c * c for c in recent) / window - mean * mean)
         std = math.sqrt(variance)
         price = closes[-1]
+        trend_recent = closes[-trend_window:]
+        trend_mean = sum(trend_recent) / trend_window
+        trend_ok = price >= trend_mean
         has_position = symbol in positions and positions[symbol].qty > 0
-        decisions.append(decide(symbol, price, mean, std, has_position, window, entry_zscore, exit_zscore))
+        decisions.append(decide(symbol, price, mean, std, has_position, window, entry_zscore, exit_zscore, trend_ok))
     return decisions

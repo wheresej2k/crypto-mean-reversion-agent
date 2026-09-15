@@ -19,7 +19,7 @@ from config import PARAMS_PATH, load_params, load_settings
 from tune import WINDOWS_TO_TEST, rank_safe_combos, sweep
 
 SUMMARY_PATH = "retune_summary.md"
-TUNED_KEYS = ["window", "entry_zscore", "exit_zscore", "stop_loss_pct", "take_profit_pct", "min_confidence"]
+TUNED_KEYS = ["window", "trend_window", "entry_zscore", "exit_zscore", "stop_loss_pct", "take_profit_pct", "min_confidence"]
 
 
 def write_summary(text: str):
@@ -47,10 +47,10 @@ def main():
         return
 
     best = safe_results[0]
-    w, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold = best
+    w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold = best
     proposed = dict(current_params)
     proposed.update({
-        "window": w, "entry_zscore": ez, "exit_zscore": xz,
+        "window": w, "trend_window": tw, "entry_zscore": ez, "exit_zscore": xz,
         "stop_loss_pct": sl, "take_profit_pct": tp, "min_confidence": mc,
     })
 
@@ -79,7 +79,8 @@ def main():
         "| Parameter | Current | Proposed |\n|---|---|---|\n",
     ]
     labels = {
-        "window": "Rolling window (hours)",
+        "window": "Rolling window (15-min bars)",
+        "trend_window": "Trend filter window (15-min bars)",
         "entry_zscore": "Entry z-score (buy the dip threshold)",
         "exit_zscore": "Exit z-score (reversion target)",
         "stop_loss_pct": "Stop-loss %",

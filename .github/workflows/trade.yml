@@ -1,11 +1,12 @@
-name: Hourly crypto mean-reversion paper trade
+name: Crypto mean-reversion paper trade (every 15 min)
 
 on:
   schedule:
-    # :05 past every hour. Crypto trades 24/7, so there's no market-hours window to land inside -
-    # the 5-minute offset just avoids the top-of-the-hour traffic spike GitHub's own docs warn can
-    # delay jobs, and gives the hourly bar a moment to finalize on Alpaca's side before we fetch it.
-    - cron: "5 * * * *"
+    # :03, :18, :33, :48 past every hour - trades on 15-minute bars, so the workflow runs every 15
+    # minutes to match. The offset (not exactly :00/:15/:30/:45) avoids the top-of-quarter-hour
+    # traffic spike GitHub's own docs warn can delay jobs, and gives each bar a moment to finalize
+    # on Kraken's side before we fetch it.
+    - cron: "3,18,33,48 * * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -18,9 +19,10 @@ env:
   # Your choice, not something tune.py/auto_retune.py ever touches. Strategy/risk parameters
   # live in config/params.json instead - see README for why they're kept separate.
   WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
-  # Which UTC hour gets the once-a-day MMS summary (texting every single hourly run would be
-  # spam - especially for this bot, which trades far more often than the sibling trend bot).
-  DAILY_SUMMARY_HOUR_UTC: "13"
+  # Which UTC time gets the once-a-day MMS summary (texting every 15-minute run would be spam).
+  # Must be an exact HH:MM this workflow actually runs at (see the cron above) - a mismatch here
+  # would mean the daily text silently never fires.
+  DAILY_SUMMARY_TIME_UTC: "13:03"
 
 jobs:
   trade:
@@ -31,6 +33,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
       - name: Install system fonts (for the summary image)
         run: sudo apt-get update && sudo apt-get install -y fonts-dejavu-core
@@ -42,17 +45,17 @@ jobs:
         run: python trader.py
 
       - name: Check if it's time for the once-a-day summary text
-        id: check_hour
+        id: check_time
         run: |
-          HOUR=$(date -u +%H)
-          if [ "$HOUR" = "$DAILY_SUMMARY_HOUR_UTC" ]; then
+          NOW=$(date -u +%H:%M)
+          if [ "$NOW" = "$DAILY_SUMMARY_TIME_UTC" ]; then
             echo "is_summary_time=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_summary_time=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Text the daily summary image to phone
-        if: steps.check_hour.outputs.is_summary_time == 'true'
+        if: steps.check_time.outputs.is_summary_time == 'true'
         env:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}

@@ -1,7 +1,8 @@
-"""Entry point. Run this to do one trading pass: fetch live Kraken hourly bars -> validate them ->
-reconcile any open position's stop-loss/take-profit against newly seen bars -> generate signals
+"""Entry point. Run this to do one trading pass: fetch live Kraken 15-minute bars -> validate them
+-> reconcile any open position's stop-loss/take-profit against newly seen bars -> generate signals
 (free, rule-based mean reversion) -> apply risk limits -> "place" trades in the local paper ledger
-(paper_broker.py). Crypto trades 24/7, so there's no market-hours gate to check.
+(paper_broker.py). Crypto trades 24/7, so there's no market-hours gate to check. Meant to run every
+15 minutes via a scheduled GitHub Actions workflow, matching the bar size the strategy trades on.
 
 Unlike the Alpaca-based sibling bots, nothing here ever touches a real exchange order - see
 paper_broker.py's module docstring for why (Kraken has no spot paper-trading sandbox) and for the
@@ -34,8 +35,8 @@ def main():
     settings = load_settings()
     broker = PaperBroker()
 
-    # --- ACCURATE pillar: fetch, then validate, hourly market data before trusting it ---
-    print(f"Fetching hourly bars from Kraken for: {', '.join(settings.watchlist)}")
+    # --- ACCURATE pillar: fetch, then validate, market data before trusting it ---
+    print(f"Fetching 15-minute bars from Kraken for: {', '.join(settings.watchlist)}")
     raw_bars = {}
     for symbol in settings.watchlist:
         try:
@@ -44,7 +45,7 @@ def main():
             print(f"  WARNING: could not fetch data for {symbol}: {e}")
             log_row(symbol, "DATA", "failed", reasoning=f"fetch failed: {e}")
 
-    valid_bars, issues = validate(raw_bars, settings.window)
+    valid_bars, issues = validate(raw_bars, max(settings.window, settings.trend_window))
     for issue in issues:
         print(f"  DATA SKIP {issue.symbol:10s} - {issue.reason}")
         log_row(issue.symbol, "DATA", "skipped", reasoning=issue.reason)
@@ -75,8 +76,8 @@ def main():
     print(f"Open positions: {list(positions.keys()) or 'none'}")
 
     # --- Generate signals, apply risk limits ---
-    print("Generating signals (mean reversion, hourly bars from Kraken)...")
-    decisions = generate_signals(valid_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore)
+    print("Generating signals (mean reversion, 15-minute bars from Kraken)...")
+    decisions = generate_signals(valid_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore, settings.trend_window)
     decisions_by_symbol = {d.symbol: d for d in decisions}
 
     approved_buys, approved_sells, skipped = evaluate_decisions(

@@ -35,8 +35,8 @@ jobs:
 
       # SAFETY GATE: this only opens a pull request - it never merges one. `add-paths` restricts
       # it to config/params.json specifically, so it does nothing at all (no PR, no branch) if
-      # that file didn't change. The proposed parameters do not take effect on the live hourly
-      # bot until a human reviews retune_summary.md's backtest numbers and merges the PR.
+      # that file didn't change. The proposed parameters do not take effect on the live bot until
+      # a human reviews retune_summary.md's backtest numbers and merges the PR.
       - name: Open a pull request if a better safe combination was found
         uses: peter-evans/create-pull-request@v6
         with:

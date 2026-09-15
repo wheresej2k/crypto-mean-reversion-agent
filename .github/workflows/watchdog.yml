@@ -2,18 +2,20 @@ name: Crypto mean-reversion bot watchdog
 
 on:
   schedule:
-    # Hourly at :50, offset from the trading job's :05 so it isn't checking mid-run. Runs
-    # independently of the hourly-trade workflow on purpose - if THAT workflow's schedule
-    # silently fails to fire (a real, confirmed GitHub Actions failure mode - see the sibling
-    # crypto-trading-agent project's history), this one still runs and notices, because it
-    # doesn't depend on the same trigger.
-    - cron: "50 * * * *"
+    # Every 15 min at :10, :25, :40, :55 - offset from the trading job's :03/:18/:33/:48 so it
+    # isn't checking mid-run. Runs independently of the trade workflow on purpose - if THAT
+    # workflow's schedule silently fails to fire (a real, confirmed GitHub Actions failure mode -
+    # see the sibling crypto-trading-agent project's history), this one still runs and notices,
+    # because it doesn't depend on the same trigger. Checking this often is what makes a
+    # 30-minute alert threshold (below) actually catchable at this bot's cadence.
+    - cron: "10,25,40,55 * * * *"
   workflow_dispatch: {}
 
 env:
-  # 2 hours means roughly "2 consecutive misses" gets caught, not just a sustained multi-hour
-  # outage - same threshold the sibling bot settled on after a real missed-run incident.
-  WATCHDOG_ALERT_AFTER_HOURS: "2"
+  # 0.5 hours (30 min) means roughly "2 consecutive missed 15-minute runs" gets caught, scaled
+  # down from the sibling bot's 2-hour/hourly-cadence threshold to match this bot running 4x
+  # more often.
+  WATCHDOG_ALERT_AFTER_HOURS: "0.5"
 
 jobs:
   check:

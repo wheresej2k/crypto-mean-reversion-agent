@@ -1,20 +1,21 @@
-"""Backtests the mean-reversion strategy against real historical hourly crypto bars, so you can
+"""Backtests the mean-reversion strategy against real historical 15-minute crypto bars, so you can
 see how it would have performed over months/years in a few seconds - instead of waiting for the
-live bot to trade one hour at a time. Uses the exact same decision rule (strategy.decide) and the
+live bot to trade one bar at a time. Uses the exact same decision rule (strategy.decide) and the
 exact same risk_manager.evaluate_decisions() as the live bot - this reflects the real rules, not
 a separate rosier simulation.
 
 It also mirrors the real stop-loss/take-profit mechanism the live bot's paper_broker.py uses: a
-simulated position closes at the stop or target price the instant an hourly bar's low/high
-crosses it.
+simulated position closes at the stop or target price the instant a bar's low/high crosses it.
 
 Historical data comes from Alpaca's free, public crypto market data (no API key needed - see the
 note in kraken_client.py for why backtesting stays on Alpaca while live trading uses Kraken).
 This project needs no Alpaca account at all; the data client below is deliberately unauthenticated.
+Bars are 15 minutes (kraken_client.BAR_MINUTES) so this backtest validates the same granularity
+the live bot actually trades on.
 
 Usage:
-    python backtest.py                 # last 8760 hours (~1 year)
-    python backtest.py --hours 43800   # ~5 years - close to the full history Alpaca has for crypto
+    python backtest.py                 # last 35040 bars (~1 year of 15-min bars)
+    python backtest.py --bars 175200   # ~5 years - close to the full history Alpaca has for crypto
 """
 import argparse
 from datetime import datetime, timedelta, timezone
@@ -23,64 +24,72 @@ import math
 
 from alpaca.data.historical import CryptoHistoricalDataClient
 from alpaca.data.requests import CryptoBarsRequest
-from alpaca.data.timeframe import TimeFrame
+from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 
 from config import load_settings
+from kraken_client import BAR_MINUTES
 from models import Bar, PositionSnapshot
 from risk_manager import evaluate_decisions
 from strategy import decide, rolling_mean_std_series
 
 STARTING_CASH = 100_000.0
+BAR_TIMEFRAME = TimeFrame(BAR_MINUTES, TimeFrameUnit.Minute)
 
 
-def fetch_hourly_bars(data_client, symbol, hours):
-    start = datetime.now(timezone.utc) - timedelta(hours=int(hours * 1.1) + 48)
-    req = CryptoBarsRequest(symbol_or_symbols=symbol, timeframe=TimeFrame.Hour, start=start)
-    raw = list(data_client.get_crypto_bars(req)[symbol])[-hours:]
+def fetch_recent_bars(data_client, symbol, bars):
+    start = datetime.now(timezone.utc) - timedelta(minutes=int(bars * BAR_MINUTES * 1.1) + 60)
+    req = CryptoBarsRequest(symbol_or_symbols=symbol, timeframe=BAR_TIMEFRAME, start=start)
+    raw = list(data_client.get_crypto_bars(req)[symbol])[-bars:]
     return [
         Bar(b.timestamp, float(b.open), float(b.high), float(b.low), float(b.close), float(b.volume))
         for b in raw
     ]
 
 
-def fetch_all_bars(settings, data_client, hours):
+def fetch_all_bars(settings, data_client, bars):
     """Fetches history for every watchlist symbol once, so it can be reused across many
     simulate() calls with different settings (e.g. tune.py's parameter sweep) without re-hitting
     the API for every combination.
     """
     bars_by_symbol = {}
     for symbol in settings.watchlist:
-        bars = fetch_hourly_bars(data_client, symbol, hours)
-        if len(bars) < hours // 2:
-            print(f"  WARNING: not enough history for {symbol} ({len(bars)} hours), skipping")
+        b = fetch_recent_bars(data_client, symbol, bars)
+        if len(b) < bars // 2:
+            print(f"  WARNING: not enough history for {symbol} ({len(b)} bars), skipping")
             continue
-        bars_by_symbol[symbol] = bars
+        bars_by_symbol[symbol] = b
     if not bars_by_symbol:
         raise SystemExit("No symbols had enough historical data to backtest.")
     return bars_by_symbol
 
 
-def run_backtest(settings, data_client, hours):
-    bars_by_symbol = fetch_all_bars(settings, data_client, hours)
+def run_backtest(settings, data_client, bars):
+    bars_by_symbol = fetch_all_bars(settings, data_client, bars)
     return simulate(settings, bars_by_symbol)
 
 
-def simulate(settings, bars_by_symbol):
-    required_window = settings.window
+def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_symbol=None):
+    """`mean_std_by_symbol`/`trend_mean_by_symbol` can be precomputed and passed in - tune.py's
+    sweep() does this, since many combinations share the same window/trend_window value and
+    recomputing these O(n) series fresh for every one of 1000+ combinations (rather than once per
+    distinct value) was wasted work severe enough to cause a real MemoryError during a 15-minute-
+    bar, 5-year sweep. Direct callers (backtest.py's own CLI, a single one-off simulate() call)
+    can omit both and get the original recompute-internally behavior.
+    """
+    required_window = max(settings.window, settings.trend_window)
     bars_by_symbol = {
         s: bars for s, bars in bars_by_symbol.items() if len(bars) >= required_window + 1
     }
     if not bars_by_symbol:
         return None
 
-    # Precompute the full rolling mean/stddev history once per symbol (see
-    # strategy.rolling_mean_std_series) instead of recomputing a window's stats at every
-    # timestep - this is what keeps a multi-year hourly sweep in tune.py fast rather than
-    # impractically slow.
     closes_by_symbol = {s: [b.close for b in bars] for s, bars in bars_by_symbol.items()}
-    mean_std_by_symbol = {s: rolling_mean_std_series(c, settings.window) for s, c in closes_by_symbol.items()}
+    if mean_std_by_symbol is None:
+        mean_std_by_symbol = {s: rolling_mean_std_series(c, settings.window) for s, c in closes_by_symbol.items()}
+    if trend_mean_by_symbol is None:
+        trend_mean_by_symbol = {s: rolling_mean_std_series(c, settings.trend_window)[0] for s, c in closes_by_symbol.items()}
 
-    num_hours = min(len(b) for b in bars_by_symbol.values())
+    num_bars = min(len(b) for b in bars_by_symbol.values())
     start_index = required_window
 
     cash = STARTING_CASH
@@ -91,9 +100,9 @@ def simulate(settings, bars_by_symbol):
     equity_curve = []
     prev_equity = STARTING_CASH
 
-    for i in range(start_index, num_hours):
-        # Check every open position's stop-loss/take-profit against this hour's low/high - the
-        # exact same trigger condition the two real resting orders use.
+    for i in range(start_index, num_bars):
+        # Check every open position's stop-loss/take-profit against this bar's low/high - the
+        # exact same trigger condition paper_broker.py's live reconciliation uses.
         for symbol in list(positions.keys()):
             bar_now = bars_by_symbol[symbol][i]
             pos = positions[symbol]
@@ -127,12 +136,14 @@ def simulate(settings, bars_by_symbol):
         for symbol in bars_by_symbol:
             mean, std = mean_std_by_symbol[symbol]
             mean_i, std_i = mean[i], std[i]
-            if math.isnan(mean_i) or math.isnan(std_i):
+            trend_mean_i = trend_mean_by_symbol[symbol][i]
+            if math.isnan(mean_i) or math.isnan(std_i) or math.isnan(trend_mean_i):
                 continue
             has_position = symbol in position_snapshots
+            trend_ok = closes_now[symbol] >= trend_mean_i
             decisions.append(decide(
                 symbol, closes_now[symbol], mean_i, std_i, has_position,
-                settings.window, settings.entry_zscore, settings.exit_zscore,
+                settings.window, settings.entry_zscore, settings.exit_zscore, trend_ok,
             ))
 
         approved_buys, approved_sells, _ = evaluate_decisions(decisions, settings, equity, cash, position_snapshots, day_pl_pct)
@@ -178,7 +189,7 @@ def simulate(settings, bars_by_symbol):
 
     per_symbol_alloc = STARTING_CASH / len(bars_by_symbol)
     buy_hold_final = sum(
-        per_symbol_alloc / closes_by_symbol[s][start_index] * closes_by_symbol[s][num_hours - 1]
+        per_symbol_alloc / closes_by_symbol[s][start_index] * closes_by_symbol[s][num_bars - 1]
         for s in bars_by_symbol
     )
     buy_hold_return_pct = (buy_hold_final - STARTING_CASH) / STARTING_CASH * 100
@@ -194,7 +205,7 @@ def simulate(settings, bars_by_symbol):
 
     return {
         "symbols_used": list(bars_by_symbol.keys()),
-        "hours_simulated": num_hours - start_index,
+        "bars_simulated": num_bars - start_index,
         "starting_equity": STARTING_CASH,
         "final_equity": final_equity,
         "total_return_pct": total_return_pct,
@@ -208,17 +219,18 @@ def simulate(settings, bars_by_symbol):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--hours", type=int, default=8760, help="How many hourly bars of history to simulate (default: 8760 = ~1 year)")
+    parser.add_argument("--bars", type=int, default=35040, help="How many 15-minute bars of history to simulate (default: 35040 = ~1 year)")
     args = parser.parse_args()
 
     settings = load_settings()
     data_client = CryptoHistoricalDataClient()  # no keys - Alpaca's crypto market data is public
 
-    print(f"Backtesting {', '.join(settings.watchlist)} over the last {args.hours} hourly bars (~{args.hours / 24 / 365.25:.1f} years)...\n")
-    r = run_backtest(settings, data_client, args.hours)
+    years = args.bars * BAR_MINUTES / 60 / 24 / 365.25
+    print(f"Backtesting {', '.join(settings.watchlist)} over the last {args.bars} 15-minute bars (~{years:.1f} years)...\n")
+    r = run_backtest(settings, data_client, args.bars)
 
     print(f"Symbols used: {', '.join(r['symbols_used'])}")
-    print(f"Hourly bars simulated: {r['hours_simulated']}")
+    print(f"15-minute bars simulated: {r['bars_simulated']}")
     print(f"Starting equity: ${r['starting_equity']:,.2f}")
     print(f"Final equity:    ${r['final_equity']:,.2f}")
     print(f"Strategy return:      {r['total_return_pct']:+.2f}%")
