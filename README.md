@@ -50,9 +50,9 @@ needed) since it has much deeper history in a single API call than Kraken's publ
 trades on, about a week).
 
 **The real, honest tradeoff this introduces** (read this before trusting it):
-- **No dashboard.** Alpaca gave the sibling bot a real web dashboard to check positions/P&L
-  anytime. This bot's "account" only exists in `state/paper_state.json` and `logs/trade_log.csv` -
-  check those files (or wait for the daily text) to see what it's doing.
+- **No exchange-hosted dashboard.** Alpaca gave the sibling bot a real web dashboard to check
+  positions/P&L anytime. This bot's "account" only exists in `state/paper_state.json` and
+  `logs/trade_log.csv` - see "Dashboard" below for a status page built from exactly those files.
 - **Stop-loss/take-profit are checked once per run, not continuously.** A real Alpaca resting
   order protects a position on the exchange itself, 24/7, independent of whether the bot happens
   to be running. This local ledger only checks a position's stop/target levels against whatever
@@ -213,7 +213,7 @@ considered "good," not just implied by whatever the code happens to do.
 | Execution | Real paper orders on Alpaca's API | Fully simulated locally - no real order ever placed anywhere |
 | Account/API key needed | Yes - Alpaca paper keys | **None at all** - both data sources (Kraken, Alpaca) are used unauthenticated |
 | Stop-loss/take-profit | Real resting orders, protect 24/7 independent of run frequency | Checked once per run against fetched bars (see tradeoff above) |
-| Monitoring | Alpaca's own web dashboard | `state/paper_state.json` + `logs/trade_log.csv` + the daily text - no external dashboard |
+| Monitoring | Alpaca's own web dashboard | A free static dashboard on GitHub Pages (see "Dashboard" below), rebuilt by GitHub Actions every run - no Claude involved, works even if you're out of Claude usage |
 | Repo visibility | Private (fits under the free Actions-minutes cap at hourly cadence) | **Public** - every-15-minutes cadence would exceed a private repo's free 2,000 min/month; public repos get unlimited free minutes |
 | Observed trade frequency | Occasional - can sit out for days/weeks | See validated backtest above |
 | Everything else (risk limits, retries, watchdog, logging schema shape) | Same proven infrastructure, copied unmodified where the logic is strategy-agnostic | |
@@ -329,11 +329,21 @@ flip the repo back to private and reduce the schedule in `.github/workflows/trad
 
 ## Reviewing results
 
+### Dashboard
+**https://wheresej2k.github.io/crypto-mean-reversion-agent/** - a status page (cash, equity, open
+positions, live strategy parameters, recent activity) rebuilt by `build_dashboard.py` and
+committed as `docs/index.html` after every 15-minute trading run, hosted free by GitHub Pages.
+This is deliberately a plain static page with no client-side data fetching and no dependency on
+Claude in any way (an earlier version of this dashboard was a scheduled Claude session that
+rebuilt and republished a claude.ai Artifact - that stopped updating whenever Claude usage ran
+out, which defeats the point of a 24/7 bot). GitHub Actions - not Claude - regenerates this page
+every single run, so it keeps updating no matter what.
+
 - `logs/trade_log.csv` - one row per decision, plus a linked row when a position closes, with the
   rolling mean/z-score the strategy saw and the realized P/L.
 - `state/paper_state.json` - the entire simulated account: cash, and every currently open position
-  with its stop/target levels. **There is no external dashboard for this bot** (unlike the sibling
-  Alpaca bot) - this file and the trade log are the source of truth.
+  with its stop/target levels. This file and the trade log are the ultimate source of truth (the
+  dashboard above is generated from exactly these two files).
 - `state/last_success.json` - when the bot last completed a run successfully.
 
 ## Important limitations - please read

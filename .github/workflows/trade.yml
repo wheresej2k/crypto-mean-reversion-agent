@@ -44,6 +44,9 @@ jobs:
       - name: Run trading bot
         run: python trader.py
 
+      - name: Rebuild the static dashboard (docs/index.html, served by GitHub Pages)
+        run: python build_dashboard.py
+
       - name: Check if it's time for the once-a-day summary text
         id: check_time
         run: |
@@ -69,7 +72,7 @@ jobs:
           # logs/*.csv is gitignored (keeps local dry-run test logs out of git on your own
           # machine) - -f explicitly overrides that just for the real trade log. state/ files
           # aren't gitignored but may not exist yet on a brand-new repo's first run.
-          for f in logs/trade_log.csv state/paper_state.json state/last_success.json; do
+          for f in logs/trade_log.csv state/paper_state.json state/last_success.json docs/index.html; do
             if [ -f "$f" ]; then
               git add -f "$f"
             fi
