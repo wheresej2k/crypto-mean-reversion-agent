@@ -43,6 +43,49 @@ def load_recent_log_rows(path, limit):
     return list(reversed(rows[-limit:]))
 
 
+def load_executed_trades(path):
+    if not path.exists():
+        return []
+    with open(path, newline="") as f:
+        return [r for r in csv.DictReader(f)
+                if r.get("status") == "executed" and r.get("action") in ("BUY", "SELL", "CLOSE")]
+
+
+def build_last_trade_card(trades):
+    if not trades:
+        return '<p class="muted">No trades have been executed yet.</p>'
+    last = trades[-1]
+    details = last.get("exit_reason") or last.get("reasoning") or ""
+    return (
+        f'<p><strong>{esc(last.get("symbol"))} — {esc(last.get("action"))}</strong></p>'
+        f'<p>{utc_span(last.get("timestamp_utc"))}</p>'
+        f'<p>{esc(details)}</p>'
+    )
+
+
+def build_closed_trades_table(trades):
+    closed = [r for r in trades if r.get("action") == "CLOSE"]
+    if not closed:
+        return '<p class="muted">No trades have closed yet.</p>'
+    rows = []
+    for trade in reversed(closed):
+        cells = [utc_span(trade.get("timestamp_utc")), esc(trade.get("symbol")),
+                 esc(trade.get("exit_reason"))]
+        for field in ("entry_price", "exit_price"):
+            value = trade.get(field)
+            cells.append(fmt_money(float(value)) if value else "n/a")
+        value = trade.get("pl_pct")
+        pl = float(value) if value else None
+        pl_class = "" if pl is None else ("pos" if pl >= 0 else "neg")
+        rows.append('<tr>' + ''.join(f'<td>{cell}</td>' for cell in cells)
+                    + f'<td class="{pl_class}">{fmt_pct(pl)}</td></tr>')
+    return (
+        '<div class="table-scroll"><table><thead><tr><th>Closed</th><th>Symbol</th>'
+        '<th>Exit reason</th><th>Entry</th><th>Exit</th><th>Realized P/L</th>'
+        '</tr></thead><tbody>' + ''.join(rows) + '</tbody></table></div>'
+    )
+
+
 def fmt_money(v):
     return f"${v:,.2f}"
 
@@ -118,7 +161,7 @@ def build_log_table(rows):
         status = r.get("status", "")
         action = r.get("action", "")
         css_class = "row-buy" if action == "BUY" and status == "executed" else (
-            "row-sell" if action == "SELL" and status == "executed" else (
+            "row-sell" if action in ("SELL", "CLOSE") and status == "executed" else (
                 "row-error" if status == "failed" else ""
             )
         )
@@ -144,6 +187,7 @@ def main():
     last_success = load_json(STATE_DIR / "last_success.json") or {}
     params = load_params()
     log_rows = load_recent_log_rows(LOG_PATH, MAX_LOG_ROWS)
+    trades = load_executed_trades(LOG_PATH)
 
     positions = state.get("positions", {})
     cash = state.get("cash", 0.0)
@@ -183,6 +227,10 @@ def main():
   .card {{ background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }}
   .card .label {{ color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; }}
   .card .value {{ font-size: 22px; font-weight: 600; margin-top: 4px; }}
+  .card.clickable {{ color: var(--text); font: inherit; text-align: left; cursor: pointer; }}
+  .card.clickable:hover, .card.clickable:focus-visible {{ border-color: var(--accent); }}
+  .card .card-hint {{ color: var(--accent); font-size: 12px; margin-top: 4px; }}
+  .card.clickable span {{ display: block; }}
   .pos {{ color: var(--green); }} .neg {{ color: var(--red); }}
   section {{ background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 20px; }}
   section h2 {{ font-size: 15px; margin: 0 0 12px; }}
@@ -200,7 +248,7 @@ def main():
   footer {{ text-align: center; color: var(--muted); font-size: 12px; margin-top: 24px; }}
   a {{ color: var(--accent); }}
   code {{ background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 12px; }}
-  .tabs {{ display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }}
+  .tabs {{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }}
   .tab-btn {{
     background: none; border: none; color: var(--muted); font: inherit; font-weight: 600;
     padding: 10px 4px; margin-right: 16px; cursor: pointer; border-bottom: 2px solid transparent;
@@ -222,6 +270,7 @@ def main():
 
   <div class="tabs">
     <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
+    <button class="tab-btn" data-tab="last-trade">Last Trade</button>
     <button class="tab-btn" data-tab="alpaca">Trend-Following (Alpaca)</button>
   </div>
 
@@ -236,7 +285,11 @@ def main():
       <div class="card"><div class="label">Equity</div><div class="value">{fmt_money(equity)}</div></div>
       <div class="card"><div class="label">Total return</div><div class="value {'pos' if total_return_pct >= 0 else 'neg'}">{fmt_pct(total_return_pct)}</div></div>
       <div class="card"><div class="label">Open positions</div><div class="value">{len(positions)}</div></div>
-      <div class="card"><div class="label">Completed runs</div><div class="value">{last_success.get('run_count', 'n/a')}</div></div>
+      <button type="button" class="card clickable" id="card-completed-runs" aria-controls="tab-last-trade">
+        <span class="label">Completed runs</span>
+        <span class="value">{last_success.get('run_count', 'n/a')}</span>
+        <span class="card-hint">View trades &rarr;</span>
+      </button>
     </div>
 
     <section>
@@ -266,6 +319,26 @@ def main():
     </section>
   </div>
 
+  <div class="tab-panel" id="tab-last-trade">
+    <p class="subtitle">Kraken simulated trades, showing executed buys, sells, and closes.</p>
+    <section>
+      <h2>Last trade taken</h2>
+      {build_last_trade_card(trades)}
+    </section>
+    <section>
+      <h2>Open trades</h2>
+      {build_positions_table(positions, live_prices)}
+    </section>
+    <section>
+      <h2>Realized P/L (closed trades)</h2>
+      {build_closed_trades_table(trades)}
+    </section>
+    <section>
+      <h2>Executed trade history</h2>
+      {build_log_table(list(reversed(trades))) if trades else '<p class="muted">No trades have been executed yet.</p>'}
+    </section>
+  </div>
+
   <div class="tab-panel" id="tab-alpaca">
     <p class="subtitle">
       Sibling bot's own live dashboard, embedded directly from its own GitHub Pages site
@@ -290,13 +363,18 @@ def main():
     }});
   }});
 
+  function activateTab(name) {{
+    document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.toggle('active', b.dataset.tab === name); }});
+    document.querySelectorAll('.tab-panel').forEach(function(p) {{ p.classList.toggle('active', p.id === 'tab-' + name); }});
+  }}
+
   document.querySelectorAll('.tab-btn').forEach(function(btn) {{
-    btn.addEventListener('click', function() {{
-      document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.remove('active'); }});
-      document.querySelectorAll('.tab-panel').forEach(function(p) {{ p.classList.remove('active'); }});
-      btn.classList.add('active');
-      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
-    }});
+    btn.addEventListener('click', function() {{ activateTab(btn.dataset.tab); }});
+  }});
+
+  document.getElementById('card-completed-runs').addEventListener('click', function() {{
+    activateTab('last-trade');
+    document.querySelector('.tabs').scrollIntoView({{ behavior: 'smooth', block: 'start' }});
   }});
 </script>
 </body>
