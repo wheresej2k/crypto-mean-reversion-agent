@@ -251,12 +251,11 @@ def main():
   .tabs {{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border); }}
   .tab-btn {{
     background: none; border: none; color: var(--muted); font: inherit; font-weight: 600;
-    padding: 10px 4px; margin-right: 16px; cursor: pointer; border-bottom: 2px solid transparent;
+    text-decoration: none; padding: 10px 4px; margin-right: 16px; cursor: pointer; border-bottom: 2px solid transparent;
   }}
   .tab-btn.active {{ color: var(--text); border-bottom-color: var(--accent); }}
   .tab-panel {{ display: none; }}
   .tab-panel.active {{ display: block; }}
-  iframe {{ width: 100%; height: 1700px; border: 0; border-radius: 10px; }}
 </style>
 </head>
 <body>
@@ -271,7 +270,7 @@ def main():
   <div class="tabs">
     <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
     <button class="tab-btn" data-tab="last-trade">Last Trade</button>
-    <button class="tab-btn" data-tab="alpaca">Trend-Following (Alpaca)</button>
+    <a class="tab-btn" href="{SIBLING_DASHBOARD_URL}" target="_top">Trend-Following (Alpaca)</a>
   </div>
 
   <div class="tab-panel active" id="tab-kraken">
@@ -339,13 +338,7 @@ def main():
     </section>
   </div>
 
-  <div class="tab-panel" id="tab-alpaca">
-    <p class="subtitle">
-      Sibling bot's own live dashboard, embedded directly from its own GitHub Pages site
-      (<a href="{SIBLING_DASHBOARD_URL}" target="_blank" rel="noopener">open in a new tab</a>).
-    </p>
-    <iframe src="{SIBLING_DASHBOARD_URL}" loading="lazy" title="Trend-following bot dashboard"></iframe>
-  </div>
+
 
   <footer>
     Source: <a href="https://github.com/wheresej2k/crypto-mean-reversion-agent">github.com/wheresej2k/crypto-mean-reversion-agent</a>
@@ -364,11 +357,11 @@ def main():
   }});
 
   function activateTab(name) {{
-    document.querySelectorAll('.tab-btn').forEach(function(b) {{ b.classList.toggle('active', b.dataset.tab === name); }});
+    document.querySelectorAll('button.tab-btn').forEach(function(b) {{ b.classList.toggle('active', b.dataset.tab === name); }});
     document.querySelectorAll('.tab-panel').forEach(function(p) {{ p.classList.toggle('active', p.id === 'tab-' + name); }});
   }}
 
-  document.querySelectorAll('.tab-btn').forEach(function(btn) {{
+  document.querySelectorAll('button.tab-btn').forEach(function(btn) {{
     btn.addEventListener('click', function() {{ activateTab(btn.dataset.tab); }});
   }});
 
