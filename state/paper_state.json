@@ -1,5 +1,5 @@
 {
-  "cash": 83168.56928798837,
+  "cash": 97965.34779220037,
   "starting_cash": 100000.0,
   "day_start_equity": 97845.3792880332,
   "day_start_date": "2026-09-17",
@@ -11,7 +11,7 @@
       "target_price": 12.0272565,
       "trade_id": "fae024f5",
       "opened_at": "2026-09-15T05:55:47+00:00",
-      "checked_through": "2026-09-17T11:45:00+00:00"
+      "checked_through": "2026-09-17T12:00:00+00:00"
     },
     "DOGE/USD": {
       "qty": 3.550667315721512e-09,
@@ -20,16 +20,16 @@
       "target_price": 0.08727411,
       "trade_id": "87527ddc",
       "opened_at": "2026-09-15T05:55:47+00:00",
-      "checked_through": "2026-09-17T11:45:00+00:00"
+      "checked_through": "2026-09-17T12:00:00+00:00"
     },
     "BTC/USD": {
-      "qty": 0.19281401489772593,
+      "qty": 4.897725919272844e-09,
       "entry_price": 76119.0,
       "stop_price": 70029.48,
       "target_price": 79924.95,
       "trade_id": "f13adb21",
       "opened_at": "2026-09-17T11:45:31+00:00",
-      "checked_through": "2026-09-17T11:45:31+00:00"
+      "checked_through": "2026-09-17T12:00:00+00:00"
     }
   }
 }
