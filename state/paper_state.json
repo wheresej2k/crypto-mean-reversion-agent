@@ -11,7 +11,7 @@
       "target_price": 12.0272565,
       "trade_id": "fae024f5",
       "opened_at": "2026-09-15T05:55:47+00:00",
-      "checked_through": "2026-09-17T06:00:00+00:00"
+      "checked_through": "2026-09-17T06:15:00+00:00"
     },
     "DOGE/USD": {
       "qty": 3.550667315721512e-09,
@@ -20,7 +20,7 @@
       "target_price": 0.08727411,
       "trade_id": "87527ddc",
       "opened_at": "2026-09-15T05:55:47+00:00",
-      "checked_through": "2026-09-17T06:00:00+00:00"
+      "checked_through": "2026-09-17T06:15:00+00:00"
     }
   }
 }
