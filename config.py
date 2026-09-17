@@ -67,6 +67,9 @@ class Settings:
     max_total_exposure_pct: float
     max_daily_loss_pct: float
     max_trades_per_run: int
+    trading_fee_pct: float = 0.80
+    slippage_pct: float = 0.05
+    min_signal_exit_profit_pct: float = 0.50
 
 
 def load_params(path: Path = PARAMS_PATH) -> dict:
@@ -103,4 +106,7 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
         max_total_exposure_pct=float(params["max_total_exposure_pct"]),
         max_daily_loss_pct=float(params["max_daily_loss_pct"]),
         max_trades_per_run=int(params["max_trades_per_run"]),
+        trading_fee_pct=float(params.get("trading_fee_pct", 0.80)),
+        slippage_pct=float(params.get("slippage_pct", 0.05)),
+        min_signal_exit_profit_pct=float(params.get("min_signal_exit_profit_pct", 0.50)),
     )

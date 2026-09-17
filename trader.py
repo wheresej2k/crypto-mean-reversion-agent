@@ -56,7 +56,7 @@ def main():
         bars = valid_bars.get(symbol)
         if not bars:
             continue  # this symbol's data didn't pass validation this run - can't safely check it
-        event = broker.check_stop_target_hits(symbol, bars)
+        event = broker.check_stop_target_hits(symbol, bars, settings.trading_fee_pct, settings.slippage_pct)
         if event:
             print(f"  CLOSED {event['symbol']:10s} {event['exit_reason']:12s} P/L {event['pl_pct']:+.2f}%")
             if not args.dry_run:
@@ -70,6 +70,12 @@ def main():
         return
 
     latest_prices = {symbol: bars[-1].close for symbol, bars in valid_bars.items()}
+    dust_events = broker.prune_dust_positions(latest_prices)
+    for event in dust_events:
+        print(f"  CLEAN {event['symbol']:10s} dust position removed")
+        if not args.dry_run:
+            log_close_event(event)
+
     account = broker.get_account(latest_prices)
     positions = broker.get_positions(latest_prices)
     print(f"Equity: ${account.equity:.2f}  Cash: ${account.cash:.2f}  Day P/L: {account.day_pl_pct:.2f}%")
@@ -111,11 +117,12 @@ def main():
             continue
         pos_qty = broker.state["positions"][sell.symbol]["qty"]
         if sell.qty >= pos_qty - 1e-9:
-            event = broker.close_position(sell.symbol, price, "signal_exit")
-            log_row(sell.symbol, "SELL", "executed", amount=sell.qty, confidence=sell.confidence, reasoning=sell.reasoning)
+            event = broker.close_position(sell.symbol, price, "signal_exit", settings.trading_fee_pct, settings.slippage_pct)
+            log_row(sell.symbol, "SELL", "executed", amount=sell.qty, confidence=sell.confidence, reasoning=sell.reasoning,
+                    exit_price=round(event["exit_price"], 6))
             log_close_event(event)
         else:
-            broker.partial_sell(sell.symbol, sell.qty, price)
+            broker.partial_sell(sell.symbol, sell.qty, price, settings.trading_fee_pct, settings.slippage_pct)
             log_row(sell.symbol, "SELL", "executed", amount=sell.qty, confidence=sell.confidence, reasoning=sell.reasoning)
         trades_executed += 1
 
@@ -127,10 +134,13 @@ def main():
             log_row(buy.symbol, "BUY", "dry-run", amount=buy.notional_usd, confidence=buy.confidence,
                     reasoning=buy.reasoning, rolling_mean=round(d.rolling_mean, 6), zscore=round(d.zscore, 4))
             continue
-        pos = broker.open_position(buy.symbol, buy.notional_usd, price, settings.stop_loss_pct, settings.take_profit_pct)
+        pos = broker.open_position(
+            buy.symbol, buy.notional_usd, price, settings.stop_loss_pct, settings.take_profit_pct,
+            settings.trading_fee_pct, settings.slippage_pct,
+        )
         log_row(buy.symbol, "BUY", "executed", amount=buy.notional_usd, confidence=buy.confidence,
                 reasoning=buy.reasoning, rolling_mean=round(d.rolling_mean, 6), zscore=round(d.zscore, 4),
-                trade_id=pos["trade_id"])
+                trade_id=pos["trade_id"], entry_price=round(pos["entry_price"], 6))
         trades_executed += 1
 
     if not args.dry_run:

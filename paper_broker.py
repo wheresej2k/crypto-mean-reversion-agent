@@ -83,16 +83,63 @@ class PaperBroker:
             out[symbol] = PositionSnapshot(symbol, pos["qty"], market_value, pos["entry_price"], unrealized_plpc)
         return out
 
-    def open_position(self, symbol: str, notional_usd: float, price: float, stop_loss_pct: float, take_profit_pct: float) -> dict:
-        qty = notional_usd / price
-        self.state["cash"] -= notional_usd
+    def prune_dust_positions(self, latest_prices: dict[str, float], min_market_value: float = 1.0) -> list[dict]:
+        """Remove near-zero residual positions left by old rounded full exits.
+
+        These positions have effectively no P/L impact but block new entries because the bot
+        correctly enforces one open position per symbol.
+        """
+        events = []
+        for symbol, pos in list(self.state["positions"].items()):
+            price = latest_prices.get(symbol, pos["entry_price"])
+            market_value = pos["qty"] * price
+            if 0 < market_value < min_market_value:
+                self.state["positions"].pop(symbol)
+                events.append({
+                    "symbol": symbol,
+                    "trade_id": pos["trade_id"],
+                    "exit_reason": "dust_cleanup",
+                    "entry_price": pos["entry_price"],
+                    "exit_price": price,
+                    "pl_pct": 0.0,
+                })
+        return events
+
+    @staticmethod
+    def buy_fill_price(price: float, slippage_pct: float = 0.0) -> float:
+        return price * (1 + slippage_pct / 100)
+
+    @staticmethod
+    def sell_fill_price(price: float, slippage_pct: float = 0.0) -> float:
+        return price * (1 - slippage_pct / 100)
+
+    @staticmethod
+    def fee(notional: float, trading_fee_pct: float = 0.0) -> float:
+        return notional * trading_fee_pct / 100
+
+    def open_position(
+        self,
+        symbol: str,
+        notional_usd: float,
+        price: float,
+        stop_loss_pct: float,
+        take_profit_pct: float,
+        trading_fee_pct: float = 0.0,
+        slippage_pct: float = 0.0,
+    ) -> dict:
+        fill_price = self.buy_fill_price(price, slippage_pct)
+        qty = notional_usd / fill_price
+        entry_fee = self.fee(notional_usd, trading_fee_pct)
+        self.state["cash"] -= notional_usd + entry_fee
         trade_id = str(uuid.uuid4())[:8]
         now = datetime.now(timezone.utc).isoformat(timespec="seconds")
         pos = {
             "qty": qty,
-            "entry_price": price,
-            "stop_price": price * (1 - stop_loss_pct / 100),
-            "target_price": price * (1 + take_profit_pct / 100),
+            "entry_price": fill_price,
+            "entry_notional": notional_usd,
+            "entry_fee": entry_fee,
+            "stop_price": fill_price * (1 - stop_loss_pct / 100),
+            "target_price": fill_price * (1 + take_profit_pct / 100),
             "trade_id": trade_id,
             "opened_at": now,
             "checked_through": now,
@@ -100,34 +147,49 @@ class PaperBroker:
         self.state["positions"][symbol] = pos
         return pos
 
-    def close_position(self, symbol: str, exit_price: float, exit_reason: str) -> dict:
+    def close_position(self, symbol: str, exit_price: float, exit_reason: str, trading_fee_pct: float = 0.0, slippage_pct: float = 0.0) -> dict:
         """Fully closes a position at exit_price (either a signal-driven exit or a stop/target
         hit found by check_stop_target_hits) and returns a close-event dict for trade_log.py.
         """
         pos = self.state["positions"].pop(symbol)
-        proceeds = pos["qty"] * exit_price
-        self.state["cash"] += proceeds
-        pl_pct = (exit_price - pos["entry_price"]) / pos["entry_price"] * 100
+        fill_price = self.sell_fill_price(exit_price, slippage_pct)
+        gross_proceeds = pos["qty"] * fill_price
+        exit_fee = self.fee(gross_proceeds, trading_fee_pct)
+        net_proceeds = gross_proceeds - exit_fee
+        self.state["cash"] += net_proceeds
+        entry_notional = pos.get("entry_notional", pos["qty"] * pos["entry_price"])
+        entry_fee = pos.get("entry_fee", 0.0)
+        cost_basis = entry_notional + entry_fee
+        pl_pct = (net_proceeds - cost_basis) / cost_basis * 100 if cost_basis else 0.0
         return {
             "symbol": symbol,
             "trade_id": pos["trade_id"],
             "exit_reason": exit_reason,
             "entry_price": pos["entry_price"],
-            "exit_price": exit_price,
+            "exit_price": fill_price,
             "pl_pct": pl_pct,
+            "exit_fee": exit_fee,
         }
 
-    def partial_sell(self, symbol: str, qty: float, price: float):
+    def partial_sell(self, symbol: str, qty: float, price: float, trading_fee_pct: float = 0.0, slippage_pct: float = 0.0):
         """A signal-driven SELL for less than the full position (risk_manager can size a sell
         below 100%). Full exits should go through close_position instead so the position is
         dropped from tracking and a close event is produced.
         """
         pos = self.state["positions"][symbol]
         sell_qty = min(qty, pos["qty"])
-        self.state["cash"] += sell_qty * price
+        fill_price = self.sell_fill_price(price, slippage_pct)
+        gross_proceeds = sell_qty * fill_price
+        exit_fee = self.fee(gross_proceeds, trading_fee_pct)
+        self.state["cash"] += gross_proceeds - exit_fee
+        fraction_sold = sell_qty / pos["qty"] if pos["qty"] else 1.0
+        if "entry_notional" in pos:
+            pos["entry_notional"] *= 1 - fraction_sold
+        if "entry_fee" in pos:
+            pos["entry_fee"] *= 1 - fraction_sold
         pos["qty"] -= sell_qty
 
-    def check_stop_target_hits(self, symbol: str, new_bars: list) -> dict | None:
+    def check_stop_target_hits(self, symbol: str, new_bars: list, trading_fee_pct: float = 0.0, slippage_pct: float = 0.0) -> dict | None:
         """Walks any bars fetched since this position was last checked (oldest first) and applies
         the exact same trigger rule backtest.py's simulate() uses: a stop-loss hit takes priority
         over a take-profit hit within the same bar. Advances `checked_through` regardless of
@@ -144,9 +206,9 @@ class PaperBroker:
 
         for bar in relevant:
             if bar.low <= pos["stop_price"]:
-                return self.close_position(symbol, pos["stop_price"], "stop_loss")
+                return self.close_position(symbol, pos["stop_price"], "stop_loss", trading_fee_pct, slippage_pct)
             if bar.high >= pos["target_price"]:
-                return self.close_position(symbol, pos["target_price"], "take_profit")
+                return self.close_position(symbol, pos["target_price"], "take_profit", trading_fee_pct, slippage_pct)
 
         pos["checked_through"] = relevant[-1].timestamp.isoformat(timespec="seconds")
         return None

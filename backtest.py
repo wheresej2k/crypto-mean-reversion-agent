@@ -98,7 +98,19 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     win_count = 0
     loss_count = 0
     equity_curve = []
-    prev_equity = STARTING_CASH
+    day_start_equity = STARTING_CASH
+    day_start_date = None
+    fee_pct = getattr(settings, "trading_fee_pct", 0.0)
+    slippage_pct = getattr(settings, "slippage_pct", 0.0)
+
+    def buy_fill(price):
+        return price * (1 + slippage_pct / 100)
+
+    def sell_fill(price):
+        return price * (1 - slippage_pct / 100)
+
+    def fee(notional):
+        return notional * fee_pct / 100
 
     for i in range(start_index, num_bars):
         # Check every open position's stop-loss/take-profit against this bar's low/high - the
@@ -107,13 +119,16 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             bar_now = bars_by_symbol[symbol][i]
             pos = positions[symbol]
             if bar_now.low <= pos["stop_price"]:
-                exit_price = pos["stop_price"]
+                exit_price = sell_fill(pos["stop_price"])
             elif bar_now.high >= pos["target_price"]:
-                exit_price = pos["target_price"]
+                exit_price = sell_fill(pos["target_price"])
             else:
                 continue
-            cash += pos["qty"] * exit_price
-            pl_pct = (exit_price - pos["entry_price"]) / pos["entry_price"] * 100
+            gross_proceeds = pos["qty"] * exit_price
+            net_proceeds = gross_proceeds - fee(gross_proceeds)
+            cash += net_proceeds
+            cost_basis = pos["entry_notional"] + pos["entry_fee"]
+            pl_pct = (net_proceeds - cost_basis) / cost_basis * 100 if cost_basis else 0.0
             if pl_pct > 0:
                 win_count += 1
             else:
@@ -122,15 +137,23 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             trade_count += 1
 
         closes_now = {s: closes_by_symbol[s][i] for s in bars_by_symbol}
-        position_snapshots = {}
-        for symbol, pos in positions.items():
-            price = closes_now[symbol]
-            market_value = pos["qty"] * price
-            unrealized_plpc = (price - pos["entry_price"]) / pos["entry_price"] * 100
-            position_snapshots[symbol] = PositionSnapshot(symbol, pos["qty"], market_value, pos["entry_price"], unrealized_plpc)
 
+        def snapshot_positions():
+            snapshots = {}
+            for symbol, pos in positions.items():
+                price = closes_now[symbol]
+                market_value = pos["qty"] * price
+                unrealized_plpc = (price - pos["entry_price"]) / pos["entry_price"] * 100
+                snapshots[symbol] = PositionSnapshot(symbol, pos["qty"], market_value, pos["entry_price"], unrealized_plpc)
+            return snapshots
+
+        position_snapshots = snapshot_positions()
         equity = cash + sum(p.market_value for p in position_snapshots.values())
-        day_pl_pct = (equity - prev_equity) / prev_equity * 100 if prev_equity else 0.0
+        bar_date = bars_by_symbol[next(iter(bars_by_symbol))][i].timestamp.date()
+        if day_start_date != bar_date:
+            day_start_date = bar_date
+            day_start_equity = equity
+        day_pl_pct = (equity - day_start_equity) / day_start_equity * 100 if day_start_equity else 0.0
 
         decisions = []
         for symbol in bars_by_symbol:
@@ -152,15 +175,21 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             pos = positions.pop(sell.symbol, None)
             if pos:
                 sell_qty = min(sell.qty, pos["qty"])
-                price = closes_now[sell.symbol]
-                cash += sell_qty * price
-                pl_pct = (price - pos["entry_price"]) / pos["entry_price"] * 100
+                price = sell_fill(closes_now[sell.symbol])
+                gross_proceeds = sell_qty * price
+                net_proceeds = gross_proceeds - fee(gross_proceeds)
+                cash += net_proceeds
+                fraction_sold = sell_qty / pos["qty"] if pos["qty"] else 1.0
+                cost_basis = (pos["entry_notional"] + pos["entry_fee"]) * fraction_sold
+                pl_pct = (net_proceeds - cost_basis) / cost_basis * 100 if cost_basis else 0.0
                 if pl_pct > 0:
                     win_count += 1
                 else:
                     loss_count += 1
                 remaining = pos["qty"] - sell_qty
                 if remaining > 1e-9:
+                    pos["entry_notional"] *= 1 - fraction_sold
+                    pos["entry_fee"] *= 1 - fraction_sold
                     pos["qty"] = remaining
                     positions[sell.symbol] = pos
                 trade_count += 1
@@ -170,18 +199,22 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             # already-open position instead of merging two stop/target pairs.
             if buy.symbol in positions:
                 continue
-            price = closes_now[buy.symbol]
+            price = buy_fill(closes_now[buy.symbol])
             qty = buy.notional_usd / price
-            cash -= buy.notional_usd
+            entry_fee = fee(buy.notional_usd)
+            cash -= buy.notional_usd + entry_fee
             positions[buy.symbol] = {
                 "qty": qty,
                 "entry_price": price,
+                "entry_notional": buy.notional_usd,
+                "entry_fee": entry_fee,
                 "stop_price": price * (1 - settings.stop_loss_pct / 100),
                 "target_price": price * (1 + settings.take_profit_pct / 100),
             }
             trade_count += 1
 
-        prev_equity = equity
+        position_snapshots = snapshot_positions()
+        equity = cash + sum(p.market_value for p in position_snapshots.values())
         equity_curve.append(equity)
 
     final_equity = equity_curve[-1] if equity_curve else STARTING_CASH

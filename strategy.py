@@ -53,6 +53,7 @@ class TradeDecision:
     reasoning: str
     rolling_mean: float
     zscore: float
+    price: float = 0.0
 
 
 def rolling_mean_std_series(closes: list[float], window: int) -> tuple[list[float], list[float]]:
@@ -101,7 +102,7 @@ def decide(
         return TradeDecision(
             symbol, "HOLD", 100.0, 0.0,
             f"not enough price variation in the last {window} bars to compute a reliable signal",
-            mean, 0.0,
+            mean, 0.0, price,
         )
 
     zscore = (price - mean) / std
@@ -130,7 +131,7 @@ def decide(
         action = "HOLD"
         reasoning = f"price is {zscore:+.2f} standard deviations from its {window}-bar average - no actionable signal"
 
-    return TradeDecision(symbol, action, 100.0, confidence, reasoning, mean, zscore)
+    return TradeDecision(symbol, action, 100.0, confidence, reasoning, mean, zscore, price)
 
 
 def generate_signals(

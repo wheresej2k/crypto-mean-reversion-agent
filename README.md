@@ -111,27 +111,24 @@ full story (drawdown/win-rate answer "could this wreck my account"; a rally or a
 return look artificially bad or good on its own, in either direction, regardless of strategy
 quality).
 
-### Actual validated results (2026-09-15, against Alpaca's historical crypto data, 15-minute bars)
+### Current cost-aware paper settings (2026-09-17)
 
-`tune.py`'s full grid search (window x trend_window x entry/exit z-score x stop/take x
-min_confidence - 1,296 combinations, each tested across three time windows) repeatedly proved
-impractical to run to completion in the environment this bot was developed in - the search space
-got large once the trend filter and 15-minute granularity were added, and rather than keep fighting
-that, the values below were chosen as reasonable middle-of-range defaults instead of a searched
-optimum, then validated with a single real backtest before going live:
+After the first live paper trades, the simulator was updated to charge fees and slippage. That
+changed the conclusion: the original active settings traded too often for Kraken's spot taker
+fees and lost badly in the cost-aware one-year backtest. The current config is intentionally more
+selective:
 
-`window=48 bars (12h), trend_window=192 bars (2 days), entry_zscore=2.0, exit_zscore=0.0, stop_loss=8%, take_profit=5%, min_confidence=50`
+`window=96 bars (24h), trend_window=192 bars (2 days), entry_zscore=3.5, exit_zscore=0.0, stop_loss=4%, take_profit=8%, min_confidence=50, trading_fee_pct=0.8, slippage_pct=0.05, min_signal_exit_profit_pct=1.0`
 
 | Window | Strategy return | Buy & hold | Max drawdown | Win rate | Notes |
 |---|---|---|---|---|---|
-| ~3 months | +0.03% | +31.3% | -2.46% | 71.2% | A rally period - buy-and-hold naturally wins here (see caveat above); the trend filter also holds this strategy back from chasing a straight-up move |
-| ~1 year | +23.67% | -51.2% | -4.29% | 68.2% | A rough year for buy-and-hold - the strategy's dip-buy-and-exit cycle held up much better |
-| ~5 years | +70.15% | +118.7% | -12.40% | 66.3% | Full available history, compounding reinvested gains across ~2,000 round trips |
+| ~1 year | +0.15% | -53.40% | -0.21% | 100.0% | Cost-aware run with only 1 completed round trip |
 
-All three windows clear the safety bar comfortably (worst drawdown -12.40% vs. the -38% limit,
-worst win rate 66.3% vs. the 30% floor) - there was real room to spare, not a bar just barely
-cleared. `tune.py` (or the monthly automated re-tune, `auto_retune.py`) can still be run later to
-search for a better combination than this default whenever there's time to let it run; it will
+This is not proof of a durable edge. One completed round trip is too small a sample to trust. It
+is a defensive reset away from overtrading while the bot gathers more fee-aware paper evidence.
+
+`tune.py` (or the monthly automated re-tune, `auto_retune.py`) can still be run later to
+search for a better combination whenever there's enough data and time to let it run; it will
 only ever propose a change via a reviewed pull request, never apply one silently - see "Automated
 re-tuning" below.
 
@@ -139,19 +136,17 @@ re-tuning" below.
 - **Curve-fitting risk.** Even a hand-picked default (not the output of a search) can happen to fit
   the specific stretch of history it was checked against. Treat this as a hypothesis worth testing
   on paper, not a proven result - see `tune.py`'s module docstring.
-- **Compounding amplifies a high trade count.** This bot's whole design point is trading far more
-  often than the sibling bot, and the backtest reinvests gains into the next trade every time -
-  over a 5-year window with ~2,000 round trips, that compounding is a large share of the
-  eye-catching `+70%` figure. It is not evidence that any single trade, day, or month will look
-  like that.
-- **No fees or slippage modeled**, on either the Alpaca data the backtest used or the Kraken prices
-  live trading actually uses. Real fills would differ from both.
-- **Some trades lose, by design.** A 66-75% win rate means roughly 1 in 3-4 completed trades is a
-  loss. The stop-loss exists specifically to cap how bad any one of those losses gets - it is not
-  a sign something is broken when a trade closes red.
+- **High trade count is expensive.** The first fee-aware review showed that frequent small exits
+  can get crushed by spot taker fees. The current settings prefer fewer, larger signals.
+- **Fees and slippage are modeled now.** The paper ledger and backtest charge the configurable
+  `trading_fee_pct` and `slippage_pct` values in `config/params.json`. The default fee is based
+  on Kraken Pro's lowest-volume spot taker tier as of the current fee schedule. Real fills can
+  still differ from this estimate, especially if spreads widen.
+- **Some trades lose, by design.** The stop-loss exists specifically to cap how bad any one of
+  those losses gets - it is not a sign something is broken when a trade closes red.
 - **Backtested on Alpaca's prices, traded live on Kraken's.** The two venues track the same
   underlying assets closely (arbitrage keeps them tight), but they are not identical feeds - live
-  results will differ somewhat from the backtest even before accounting for fees/slippage.
+  results will differ somewhat from the backtest even after the fee/slippage assumptions are applied.
 
 See `diagnose()` in `tune.py` if you want to re-derive any of this yourself. Tighten or loosen
 further in `tune.py` if your risk tolerance changes.
@@ -240,9 +235,9 @@ above.
 track it.
 
 ### 4. Review the strategy/risk parameters
-`config/params.json` holds the tunable numbers - it's already seeded with the validated default
-described in "Actual validated results" above. Re-run `tune.py` yourself any time you want to
-search for a better combination against fresher data.
+`config/params.json` holds the tunable numbers - it's already seeded with the conservative,
+cost-aware defaults described above. Re-run `tune.py` yourself any time you want to search for a
+better combination against fresher data.
 
 ### 5. Set up phone notifications (optional but recommended)
 1. **Carrier MMS gateway**: find your carrier's free email-to-picture-message address, e.g.
@@ -356,19 +351,17 @@ every single run, so it keeps updating no matter what.
   wiring up Kraken's actual private trading API with real credentials, a much longer paper track
   record than this project has, and a clear-eyed, explicit conversation about money you could
   fully afford to lose.
-- **No day is guaranteed green.** This bot trades far more often than the sibling bot, which means
-  more individual losing trades in absolute terms even when the overall win rate and average
-  return look good - see "Actual validated results" above for the real, non-zero loss rate.
+- **No day is guaranteed green.** Even a selective paper strategy can lose. The current settings
+  are intentionally quiet because frequent small exits were not profitable after fees.
 - **The daily-loss limit is a circuit breaker, not a guarantee.** It stops *new* buys once the
   day's loss threshold is hit; existing positions are still only protected when the bot next runs
   (see "Why there's no exchange API key" above).
 - **One open position per symbol at a time** - the bot won't add to a position it's already
   holding.
-- **Backtest returns include compounding effects from a high trade count** - see the caveat under
-  "Actual validated results." Don't read the headline `+70%`/`+23.67%` figures as a rate you
-  should expect to repeat.
+- **Backtest returns are not a promise.** The current one-year result came from only one completed
+  round trip, which is too small a sample to trust as a durable edge.
 - **This is built for 15-minute decisions on a five-coin watchlist**, not sub-minute
   high-frequency or scalping-style trading.
 - **Backtested on Alpaca prices, lives on Kraken prices** - a deliberate, documented tradeoff (see
   above), not an oversight, but real enough that live results will differ somewhat from the
-  validated backtest even before fees/slippage are considered.
+  validated backtest even after the fee/slippage assumptions are applied.

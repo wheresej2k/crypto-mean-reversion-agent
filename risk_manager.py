@@ -63,21 +63,29 @@ def evaluate_decisions(
             skipped.append(SkippedDecision(d.symbol, d.action, d.reasoning))
             continue
 
-        if d.confidence < settings.min_confidence:
-            skipped.append(
-                SkippedDecision(
-                    d.symbol, d.action, f"confidence {d.confidence:.0f} below minimum {settings.min_confidence:.0f}"
-                )
-            )
-            continue
-
         if d.action == "SELL":
             pos = positions.get(d.symbol)
             if pos is None or pos.qty <= 0:
                 skipped.append(SkippedDecision(d.symbol, d.action, "no existing position to sell"))
                 continue
+            min_signal_exit_price = pos.avg_entry_price * (
+                1 + (
+                    2 * settings.trading_fee_pct
+                    + settings.slippage_pct
+                    + settings.min_signal_exit_profit_pct
+                ) / 100
+            )
+            if d.price and d.price < min_signal_exit_price:
+                skipped.append(
+                    SkippedDecision(
+                        d.symbol,
+                        d.action,
+                        f"signal exit below fee-adjusted profit floor (${d.price:.4f} < ${min_signal_exit_price:.4f})",
+                    )
+                )
+                continue
             size_pct = max(0.0, min(100.0, d.size_pct))
-            qty = round(pos.qty * size_pct / 100, 8)
+            qty = pos.qty if size_pct >= 100.0 else round(pos.qty * size_pct / 100, 8)
             if qty <= 0:
                 skipped.append(SkippedDecision(d.symbol, d.action, "computed sell quantity is zero"))
                 continue
@@ -85,6 +93,14 @@ def evaluate_decisions(
             continue
 
         if d.action == "BUY":
+            if d.confidence < settings.min_confidence:
+                skipped.append(
+                    SkippedDecision(
+                        d.symbol, d.action, f"confidence {d.confidence:.0f} below minimum {settings.min_confidence:.0f}"
+                    )
+                )
+                continue
+
             if daily_loss_limit_hit:
                 skipped.append(
                     SkippedDecision(d.symbol, d.action, f"daily loss limit ({settings.max_daily_loss_pct}%) reached, no new buys")
@@ -114,7 +130,8 @@ def evaluate_decisions(
             notional = equity * requested_pct / 100
 
             remaining_exposure_room_usd = equity * (settings.max_total_exposure_pct / 100) - current_exposure_usd
-            notional = min(notional, remaining_exposure_room_usd, cash)
+            fee_multiplier = 1 + settings.trading_fee_pct / 100 + settings.slippage_pct / 100
+            notional = min(notional, remaining_exposure_room_usd, cash / fee_multiplier)
 
             if notional < 1:
                 skipped.append(SkippedDecision(d.symbol, d.action, "position size rounds to under $1 after risk limits"))
