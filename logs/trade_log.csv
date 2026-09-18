@@ -1559,3 +1559,8 @@ timestamp_utc,symbol,action,status,amount,confidence,reasoning,rolling_mean,zsco
 2026-09-18T21:30:48+00:00,SOL/USD,HOLD,skipped,,,price is +1.66 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
 2026-09-18T21:30:48+00:00,LINK/USD,HOLD,skipped,,,price is +1.79 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
 2026-09-18T21:30:48+00:00,DOGE/USD,HOLD,skipped,,,price is +1.37 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-18T21:45:34+00:00,BTC/USD,HOLD,skipped,,,price is +1.50 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-18T21:45:34+00:00,ETH/USD,HOLD,skipped,,,price is +1.68 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-18T21:45:34+00:00,SOL/USD,HOLD,skipped,,,price is +1.54 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-18T21:45:34+00:00,LINK/USD,HOLD,skipped,,,price is +1.72 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-18T21:45:34+00:00,DOGE/USD,HOLD,skipped,,,price is +1.28 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
