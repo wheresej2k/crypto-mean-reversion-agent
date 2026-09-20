@@ -42,11 +42,12 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run trading bot
-        # Switched from trader.py (mean reversion) to momentum on 2026-09-19 - see
-        # docs/momentum_research_2026-09-19.md. Still triggered every 15 minutes: momentum only
-        # rebalances every 14 days, but frequent no-op runs keep the watchdog heartbeat alive and
-        # cost nothing.
-        run: python momentum_trader.py
+        # Mean reversion, tuned for daily activity. Momentum (momentum_trader.py) measured
+        # better on the same data but trades ~7-30 times a YEAR - rebalancing it daily only
+        # reaches 19% of days and collapses its expectancy from +24.5% to +0.42% per trade,
+        # because low turnover is what lets it clear the ~1.65% round-trip cost. Daily activity
+        # was chosen over expectancy deliberately; see docs/strategy_review_2026-09-19.md.
+        run: python trader.py
 
       - name: Rebuild the static dashboard (docs/index.html, served by GitHub Pages)
         run: python build_dashboard.py

@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-09-19: LIVE STRATEGY IS NOW TIME-SERIES MOMENTUM (momentum_trader.py), not mean reversion. The mean-reversion settings below are kept because backtest.py/tune.py still use them, but trader.py is no longer what runs live. Reason: a ~2,000-combination sweep found NO profitable mean-reversion configuration at Kraken's 0.80%-per-side taker fee - a round trip costs ~1.65% and the average 15-minute reversion on these coins is smaller than that. Momentum beat buy & hold in 26 of 27 tested parameter combinations with positive expectancy in all 27. See docs/momentum_research_2026-09-19.md. NOTE: momentum trades ~7-30 times a YEAR, not daily - low turnover is precisely why it clears the fee.",
+  "_comment": "2026-09-19 (second revision): LIVE STRATEGY IS MEAN REVERSION AGAIN (trader.py), tuned for DAILY ACTIVITY at a survivable loss rate, at the user's explicit request after being shown that momentum cannot trade daily. Momentum is measurably the better strategy (docs/momentum_research_2026-09-19.md) but it trades ~7-30 times a YEAR: rebalancing it daily still only trades on 19% of days AND collapses its expectancy from +24.5% to +0.42% per round trip, because low turnover is precisely what lets it clear the ~1.65% round-trip cost. momentum_trader.py is kept and runnable but is not what trade.yml runs. EXPECT LOSSES from these settings: -12.4% over the last year, ~-19%/yr over 5 years. Position size is 2% of equity specifically so the ledger survives years of that. See docs/strategy_review_2026-09-19.md.",
   "window": 96,
   "trend_window": 192,
   "entry_zscore": 1.0,
@@ -8,7 +8,7 @@
   "take_profit_pct": 8,
   "min_confidence": 30,
   "max_position_pct": 2,
-  "max_total_exposure_pct": 30,
+  "max_total_exposure_pct": 12,
   "max_daily_loss_pct": 5,
   "max_trades_per_run": 5,
   "trading_fee_pct": 0.8,
