@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-09-19 (second revision): LIVE STRATEGY IS MEAN REVERSION AGAIN (trader.py), tuned for DAILY ACTIVITY at a survivable loss rate, at the user's explicit request after being shown that momentum cannot trade daily. Momentum is measurably the better strategy (docs/momentum_research_2026-09-19.md) but it trades ~7-30 times a YEAR: rebalancing it daily still only trades on 19% of days AND collapses its expectancy from +24.5% to +0.42% per round trip, because low turnover is precisely what lets it clear the ~1.65% round-trip cost. momentum_trader.py is kept and runnable but is not what trade.yml runs. EXPECT LOSSES from these settings: -12.4% over the last year, ~-19%/yr over 5 years. Position size is 2% of equity specifically so the ledger survives years of that. See docs/strategy_review_2026-09-19.md.",
+  "_comment": "2026-09-19 (second revision): LIVE STRATEGY IS MEAN REVERSION AGAIN (trader.py), tuned for DAILY ACTIVITY at a survivable loss rate, at the user's explicit request after being shown that momentum cannot trade daily. Momentum is measurably the better strategy (docs/momentum_research_2026-09-19.md) but it trades ~7-30 times a YEAR: rebalancing it daily still only trades on 19% of days AND collapses its expectancy from +24.5% to +0.42% per round trip, because low turnover is precisely what lets it clear the ~1.65% round-trip cost. momentum_trader.py is kept and runnable but is not what trade.yml runs. min_edge_pct is 0, which means the only floor is the hard round-trip cost gate in risk_manager (2 x trading_fee_pct + slippage_pct = 1.65%) - i.e. take every trade that can possibly pay for itself. That is the MAXIMUM trade frequency this strategy and watchlist can produce: 78.9% of days get a trade, longest gap 5 days. Raising min_edge_pct trades frequency back for a smaller loss (3.0 -> 48.5% of days and -12.4%/yr; 2.0 -> 72.3% and -18.9%/yr). EXPECT LOSSES: about -20.6% over the last year at these settings. Position size is 2% of equity specifically so the ledger survives years of that. See docs/strategy_review_2026-09-19.md.",
   "window": 96,
   "trend_window": 192,
   "entry_zscore": 1.0,
@@ -15,7 +15,7 @@
   "slippage_pct": 0.05,
   "min_signal_exit_profit_pct": 1.0,
   "trend_tolerance_pct": 6,
-  "min_edge_pct": 3,
+  "min_edge_pct": 0,
   "momentum_lookback_days": 56,
   "momentum_rebalance_days": 14,
   "momentum_regime_days": 150,

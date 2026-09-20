@@ -345,16 +345,17 @@ def main():
         <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
         <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
         <div><span>Trend tolerance: </span>{params.get('trend_tolerance_pct')}%</div>
-        <div><span>Min edge per trade: </span>{params.get('min_edge_pct')}%</div>
+        <div><span>Min edge per trade: </span>{max(float(params.get('min_edge_pct') or 0), 2 * float(params.get('trading_fee_pct') or 0) + float(params.get('slippage_pct') or 0)):.2f}%</div>
         <div><span>Trading fee (per side): </span>{params.get('trading_fee_pct')}%</div>
       </div>
       <p class="muted" style="margin-top:12px;">
         Buys a coin trading at least {params.get('entry_zscore')} standard deviations below its
-        recent average, provided the bounce on offer clears the {params.get('min_edge_pct')}%
-        minimum edge (a round trip costs about 1.65% in fees and slippage). Tuned for daily
-        activity rather than for returns: a full parameter sweep found no profitable setting of
+        recent average, provided the bounce on offer at least covers the round trip in fees and
+        slippage (about 1.65%). Tuned for the maximum trade frequency this strategy can produce -
+        roughly 79% of days get a trade, longest gap 5 days - rather than for returns: a full
+        parameter sweep found no profitable setting of
         this strategy at Kraken's 0.80%-per-side taker fee, so these settings are expected to lose
-        roughly 19% a year. Position size is held to {params.get('max_position_pct')}% of equity so
+        roughly 20% a year. Position size is held to {params.get('max_position_pct')}% of equity so
         the ledger survives that. The momentum strategy in this repo measures far better but trades
         only about 7-30 times a year - see docs/momentum_research_2026-09-19.md.
       </p>
