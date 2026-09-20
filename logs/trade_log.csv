@@ -2189,3 +2189,8 @@ timestamp_utc,symbol,action,status,amount,confidence,reasoning,rolling_mean,zsco
 2026-09-20T01:46:15+00:00,BTC/USD,CLOSE,executed,,,,,,,3bc511c6,strategy_switch,81267.11325,81022.76835,-1.88
 2026-09-20T01:46:15+00:00,DOGE/USD,SELL,executed,,,flattened on switch back to the mean-reversion strategy,,,,,,,0.087072,
 2026-09-20T01:46:15+00:00,DOGE/USD,CLOSE,executed,,,,,,,14f2736e,strategy_switch,0.087739,0.087072,-2.34
+2026-09-20T01:47:43+00:00,BTC/USD,BUY,skipped,,,reversion target 0.29% is below the 3.00% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-20T01:47:43+00:00,ETH/USD,BUY,skipped,,,reversion target 0.58% is below the 3.00% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-20T01:47:43+00:00,SOL/USD,BUY,skipped,,,reversion target 1.42% is below the 3.00% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-20T01:47:43+00:00,LINK/USD,BUY,skipped,,,reversion target 1.41% is below the 3.00% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-20T01:47:43+00:00,DOGE/USD,BUY,skipped,,,reversion target 1.26% is below the 3.00% minimum edge (round-trip cost 1.65%),,,,,,,,
