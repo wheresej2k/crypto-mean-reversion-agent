@@ -78,11 +78,23 @@ converts the latest price into a z-score - how many standard deviations above or
 recent average the price currently sits.
 
 - **BUY** when the z-score drops to `entry_zscore` or further below zero (price is unusually low
-  relative to its own recent range - "oversold", likely to bounce) and there's no existing
-  position in that symbol.
+  relative to its own recent range - "oversold", likely to bounce), there's no existing position in
+  that symbol, price is within `trend_tolerance_pct` of the long-term trend average, **and** the
+  reversion being reached for clears the round-trip cost (see `min_edge_pct` below).
 - **SELL** when the z-score climbs back up to `exit_zscore` or above **while holding a position**
   (price has reverted back toward - or past - its recent average; take the bounce as profit).
 - Otherwise **HOLD** - no actionable signal.
+
+Two filters sit in front of every BUY (neither ever blocks an exit):
+
+- **`trend_tolerance_pct`** - the long-term trend filter allows price to sit this far below the
+  `trend_window` average and still count as "not a confirmed downtrend". At `0` it is a hard
+  `price >= trend_mean`, which in practice cancels out the entry rule it sits beside: a dip deep
+  enough to trigger an entry has usually already pulled price slightly under the slow average.
+- **`min_edge_pct`** - a cost gate. The distance from price back to the rolling mean is the gross
+  reversion the trade is reaching for; if that is smaller than `2 x trading_fee_pct +
+  slippage_pct`, the trade cannot make money no matter how well timed it is, and is rejected. The
+  cost floor applies even when `min_edge_pct` is set to 0.
 
 The stop-loss/take-profit levels (`paper_broker.py`) are the real safety net if a "dip" just keeps
 falling instead of reverting: the strategy's own SELL signal is the target case (reversion
@@ -113,19 +125,31 @@ quality).
 
 ### Current cost-aware paper settings (2026-09-17)
 
-After the first live paper trades, the simulator was updated to charge fees and slippage. That
-changed the conclusion: the original active settings traded too often for Kraken's spot taker
-fees and lost badly in the cost-aware one-year backtest. The current config is intentionally more
-selective:
+**Read `docs/strategy_review_2026-09-19.md` before trusting any of this.** A sweep of ~2,000
+configurations across 3-month, 1-year and 5-year windows found **no profitable setting of this
+strategy at Kraken's 0.80%-per-side taker fee**. The reason is arithmetic rather than tuning: a
+round trip costs ~1.65%, and the average reversion available on a 15-minute chart for these coins
+is smaller than that. Trade frequency and expectancy are directly opposed here.
 
-`window=96 bars (24h), trend_window=192 bars (2 days), entry_zscore=3.5, exit_zscore=0.0, stop_loss=4%, take_profit=8%, min_confidence=50, trading_fee_pct=0.8, slippage_pct=0.05, min_signal_exit_profit_pct=1.0`
+The previous config (`entry_zscore=3.5`) was not conservative, it was **unreachable** - across
+1,922 live z-score observations the lowest reading ever seen was -2.95, so no BUY could fire. That
+is why the bot went two days without a trade.
 
-| Window | Strategy return | Buy & hold | Max drawdown | Win rate | Notes |
-|---|---|---|---|---|---|
-| ~1 year | +0.15% | -53.40% | -0.21% | 100.0% | Cost-aware run with only 1 completed round trip |
+The current config is deliberately set for **data collection at a survivable loss rate**, chosen
+with that tradeoff stated explicitly:
 
-This is not proof of a durable edge. One completed round trip is too small a sample to trust. It
-is a defensive reset away from overtrading while the bot gathers more fee-aware paper evidence.
+`window=96 bars (24h), trend_window=192 bars (2 days), entry_zscore=1.0, exit_zscore=0.0, trend_tolerance_pct=6, min_edge_pct=3, stop_loss=4%, take_profit=8%, min_confidence=30, max_position_pct=2, max_total_exposure_pct=12, trading_fee_pct=0.8, slippage_pct=0.05, min_signal_exit_profit_pct=1.0`
+
+| Window | Strategy return | Max drawdown | Round trips | Per day |
+|---|---|---|---|---|
+| ~3 months | -0.50% | -0.84% | 55 | 0.64 |
+| ~1 year | -12.41% | -12.71% | 476 | 1.31 |
+| ~5 years | -59.65% | -59.73% | 2,768 | 1.75 |
+
+Those are expected to be losses, roughly -19%/year annualized over the 5-year sample. Position size
+was cut from 15% to 2% of equity precisely so this can run for years as a source of labelled trade
+data instead of blowing up the ledger. It also does **not** trade literally every day - dips
+cluster, and the longest backtested dry spell is 10-12 days.
 
 `tune.py` (or the monthly automated re-tune, `auto_retune.py`) can still be run later to
 search for a better combination whenever there's enough data and time to let it run; it will

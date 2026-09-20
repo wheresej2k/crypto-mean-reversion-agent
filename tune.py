@@ -92,6 +92,15 @@ MIN_CONFIDENCES = [45, 55]             # trimmed from 3 to 2 values to offset th
 SAFE_MAX_DRAWDOWN_PCT = -38.0
 MIN_WIN_RATE_PCT = 30.0
 
+# ACTIVITY BAR, added 2026-09-19. Without this, the tuner reliably proposes a configuration that
+# barely trades: at Kraken's 0.80%-per-side taker fee every frequently-trading combination loses
+# money, so ranking purely on return always selects the most inactive combination available. That
+# is exactly how the live config ended up at entry_zscore=3.5, a threshold never once reached in
+# 1,922 live observations - the bot simply stopped trading. A combination must now average at
+# least this many completed round trips per day in EVERY window to count as a candidate, so the
+# tuner can no longer "win" by sitting in cash. See docs/strategy_review_2026-09-19.md.
+MIN_ROUND_TRIPS_PER_DAY = 0.4
+
 WINDOWS_TO_TEST = [
     ("~3 months", BARS_PER_DAY * 90),
     ("~1 year", BARS_PER_DAY * 365),
@@ -185,6 +194,7 @@ def sweep(base_settings, data_client, bars_by_symbol=None):
                 stop_loss_pct=sl, take_profit_pct=tp, min_confidence=mc,
             )
             window_returns, window_drawdowns, window_winrates, window_buyhold = {}, {}, {}, {}
+            window_trades_per_day = {}
             for label, n_bars in WINDOWS_TO_TEST:
                 mean_std_by_symbol, trend_mean_by_symbol = series_by_label[label]
                 r = simulate(settings, trimmed_bars_by_label[label], mean_std_by_symbol, trend_mean_by_symbol)
@@ -192,8 +202,11 @@ def sweep(base_settings, data_client, bars_by_symbol=None):
                 window_drawdowns[label] = r["max_drawdown_pct"] if r else None
                 window_winrates[label] = r["win_rate_pct"] if r else None
                 window_buyhold[label] = r["buy_hold_return_pct"] if r else None
+                days = (r["bars_simulated"] / BARS_PER_DAY) if r else 0
+                window_trades_per_day[label] = (r["completed_trades"] / days) if r and days else None
 
-            results.append((w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold))
+            results.append((w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns,
+                            window_winrates, window_buyhold, window_trades_per_day))
 
         pairs_done += 1
         elapsed = time.monotonic() - start_time
@@ -204,7 +217,13 @@ def sweep(base_settings, data_client, bars_by_symbol=None):
 
 
 def is_safe(row):
-    window_drawdowns, window_winrates = row[-3], row[-2]
+    window_drawdowns, window_winrates, window_trades_per_day = row[-4], row[-3], row[-1]
+
+    rates = list(window_trades_per_day.values())
+    if any(v is None for v in rates) or min(rates) < MIN_ROUND_TRIPS_PER_DAY:
+        # Too inactive to be a usable strategy - see MIN_ROUND_TRIPS_PER_DAY above.
+        return False
+
     drawdowns = [v for v in window_drawdowns.values() if v is not None]
     winrates = list(window_winrates.values())
 
@@ -219,7 +238,7 @@ def is_safe(row):
 
 
 def avg_return(row):
-    window_returns = row[-4]
+    window_returns = row[-5]
     values = [v for v in window_returns.values() if v is not None]
     return sum(values) / len(values) if values else -999
 
@@ -240,14 +259,18 @@ def _format_window(window_returns, window_drawdowns, window_winrates, window_buy
 
 def diagnose(results):
     """When nothing passes the safety filter, a bare 'nothing passed' isn't enough to act on -
-    this reports which specific criterion (drawdown or win rate) is the bottleneck, and shows the
+    this reports which specific criterion (drawdown, win rate or activity) is the bottleneck, and shows the
     closest near-misses (with return/buy-hold shown for context, even though neither gates
     safety), so there's something to actually decide from instead of just a dead end.
     """
     drawdown_ok_count = 0
     winrate_ok_count = 0
+    activity_ok_count = 0
     for row in results:
-        window_drawdowns, window_winrates = row[-3], row[-2]
+        window_drawdowns, window_winrates = row[-4], row[-3]
+        rates = list(row[-1].values())
+        if rates and all(v is not None for v in rates) and min(rates) >= MIN_ROUND_TRIPS_PER_DAY:
+            activity_ok_count += 1
         drawdowns = [v for v in window_drawdowns.values() if v is not None]
         winrates = [v for v in window_winrates.values() if v is not None]
         if drawdowns and min(drawdowns) >= SAFE_MAX_DRAWDOWN_PCT:
@@ -259,7 +282,8 @@ def diagnose(results):
     print(f"Of {total} combinations tested:")
     print(f"  {drawdown_ok_count} stayed within the {SAFE_MAX_DRAWDOWN_PCT:.0f}% drawdown limit in every window")
     print(f"  {winrate_ok_count} met the {MIN_WIN_RATE_PCT:.0f}% win-rate floor in every window")
-    print("(a combination needs both to count as 'safe' - whichever count above is lowest is the actual bottleneck)\n")
+    print(f"  {activity_ok_count} traded at least {MIN_ROUND_TRIPS_PER_DAY} round trips/day in every window")
+    print("(a combination needs all three to count as 'safe' - whichever count above is lowest is the actual bottleneck)\n")
 
     print("Closest near-misses (best average return regardless of safety, for comparison):")
     header = (
@@ -268,7 +292,8 @@ def diagnose(results):
     )
     print(header)
     by_return = sorted(results, key=avg_return, reverse=True)
-    for w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold in by_return[:10]:
+    for (w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates,
+         window_buyhold, _trades) in by_return[:10]:
         row = "  ".join(
             _format_window(window_returns, window_drawdowns, window_winrates, window_buyhold, label)
             for label, _ in WINDOWS_TO_TEST
@@ -319,7 +344,8 @@ def main():
         + "  ".join(f"{label:>32}" for label, _ in WINDOWS_TO_TEST)
     )
     print(header)
-    for w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold in safe_results[:15]:
+    for (w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates,
+         window_buyhold, _trades) in safe_results[:15]:
         row = "  ".join(
             _format_window(window_returns, window_drawdowns, window_winrates, window_buyhold, label)
             for label, _ in WINDOWS_TO_TEST
@@ -327,13 +353,15 @@ def main():
         print(f"{w:>4} {tw:>5} {ez:>7} {xz:>7} {sl:>6} {tp:>5} {mc:>7}  {row}")
 
     best = safe_results[0]
-    w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold = best
+    (w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates,
+     window_buyhold, window_trades_per_day) = best
     with open(Path(__file__).parent / "tune_best.json", "w") as f:
         json.dump({
             "window": w, "trend_window": tw, "entry_zscore": ez, "exit_zscore": xz,
             "stop_loss_pct": sl, "take_profit_pct": tp, "min_confidence": mc,
             "window_returns": window_returns, "window_drawdowns": window_drawdowns,
             "window_winrates": window_winrates, "window_buyhold": window_buyhold,
+            "window_trades_per_day": window_trades_per_day,
         }, f, indent=2)
     print("\nMost profitable combination that still passed the safety filter:")
     print(f"  window={w} bars, trend_window={tw} bars, entry_zscore={ez}, exit_zscore={xz}, stop_loss={sl}%, take_profit={tp}%, min_confidence={mc}")

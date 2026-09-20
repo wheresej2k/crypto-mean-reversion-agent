@@ -47,7 +47,8 @@ def main():
         return
 
     best = safe_results[0]
-    w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates, window_buyhold = best
+    (w, tw, ez, xz, sl, tp, mc, window_returns, window_drawdowns, window_winrates,
+     window_buyhold, window_trades_per_day) = best
     proposed = dict(current_params)
     proposed.update({
         "window": w, "trend_window": tw, "entry_zscore": ez, "exit_zscore": xz,

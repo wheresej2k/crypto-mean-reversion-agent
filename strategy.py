@@ -54,6 +54,11 @@ class TradeDecision:
     rolling_mean: float
     zscore: float
     price: float = 0.0
+    # How far price would have to travel, as a % of price, to get back to the rolling mean. This
+    # is the GROSS reversion the trade is reaching for, before fees and slippage - the number the
+    # min_edge_pct risk filter compares against, so a trade whose whole target is smaller than the
+    # round-trip cost is never taken.
+    edge_pct: float = 0.0
 
 
 def rolling_mean_std_series(closes: list[float], window: int) -> tuple[list[float], list[float]]:
@@ -102,7 +107,7 @@ def decide(
         return TradeDecision(
             symbol, "HOLD", 100.0, 0.0,
             f"not enough price variation in the last {window} bars to compute a reliable signal",
-            mean, 0.0, price,
+            mean, 0.0, price, 0.0,
         )
 
     zscore = (price - mean) / std
@@ -131,7 +136,27 @@ def decide(
         action = "HOLD"
         reasoning = f"price is {zscore:+.2f} standard deviations from its {window}-bar average - no actionable signal"
 
-    return TradeDecision(symbol, action, 100.0, confidence, reasoning, mean, zscore, price)
+    edge_pct = (mean - price) / price * 100 if price else 0.0
+    return TradeDecision(symbol, action, 100.0, confidence, reasoning, mean, zscore, price, edge_pct)
+
+
+def trend_ok_for(price: float, trend_mean: float, trend_tolerance_pct: float = 0.0) -> bool:
+    """The long-term trend filter's verdict, with a tolerance band.
+
+    The original filter was a hard `price >= trend_mean`. That turned out to fight the entry rule
+    it sits next to: a mean-reversion BUY needs price to be well BELOW its short-window mean, and
+    on a 15-minute chart a dip deep enough to trigger an entry has usually also dragged price a
+    little under the much slower trend average. The two conditions were close to mutually
+    exclusive, so almost no BUY could ever fire (confirmed against 418 live runs: 7 dips were
+    blocked by the filter and only 5 BUYs ever executed).
+
+    `trend_tolerance_pct` lets price sit that far below the trend average and still count as
+    "not a confirmed downtrend". 0 reproduces the old hard filter exactly; a large value
+    effectively disables the filter. The point of the filter - don't keep buying dips all the way
+    down a real crash - is preserved, because a genuine crash puts price far further below the
+    trend average than the tolerance band allows.
+    """
+    return price >= trend_mean * (1 - trend_tolerance_pct / 100)
 
 
 def generate_signals(
@@ -141,6 +166,7 @@ def generate_signals(
     entry_zscore: float,
     exit_zscore: float,
     trend_window: int,
+    trend_tolerance_pct: float = 0.0,
 ) -> list[TradeDecision]:
     decisions = []
     for symbol, bars in bars_by_symbol.items():
@@ -152,7 +178,7 @@ def generate_signals(
         price = closes[-1]
         trend_recent = closes[-trend_window:]
         trend_mean = sum(trend_recent) / trend_window
-        trend_ok = price >= trend_mean
+        trend_ok = trend_ok_for(price, trend_mean, trend_tolerance_pct)
         has_position = symbol in positions and positions[symbol].qty > 0
         decisions.append(decide(symbol, price, mean, std, has_position, window, entry_zscore, exit_zscore, trend_ok))
     return decisions

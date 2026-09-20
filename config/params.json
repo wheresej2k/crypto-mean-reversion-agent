@@ -1,17 +1,19 @@
 {
-  "_comment": "2026-09-15: switched to 15-minute bars and added a long-term trend filter. These are reasonable middle-of-range defaults for the new bar size (not the output of the full 1296-combo tuning sweep - that sweep repeatedly hit memory/time limits and the user opted to skip waiting for it and start live paper trading now). tune.py can still be run later to search for a better combination; auto_retune.py's monthly job will also propose updates automatically.",
+  "_comment": "2026-09-19 revision. Set from a measured sweep over 5 years of 15-minute bars, not from defaults. The 2026-09-16 settings (entry_zscore 3.5) were unreachable: across 418 live runs and 1,922 logged z-score observations the lowest reading ever seen was -2.95, so no BUY could physically fire - that is why the bot went 2 days without a trade. It also only produced 9 round trips in 5 years of backtest. These settings are chosen for DATA COLLECTION at a survivable bleed rate, not for profit: the sweep found no profitable configuration of this strategy at Kraken's 0.80%/side taker fee, and the user chose daily activity over capital preservation with that tradeoff stated explicitly. See docs/strategy_review_2026-09-19.md for the full evidence.",
   "window": 96,
   "trend_window": 192,
-  "entry_zscore": 3.5,
+  "entry_zscore": 1.0,
   "exit_zscore": 0.0,
   "stop_loss_pct": 4,
   "take_profit_pct": 8,
-  "min_confidence": 50,
-  "max_position_pct": 15,
-  "max_total_exposure_pct": 75,
+  "min_confidence": 30,
+  "max_position_pct": 2,
+  "max_total_exposure_pct": 12,
   "max_daily_loss_pct": 5,
   "max_trades_per_run": 5,
   "trading_fee_pct": 0.8,
   "slippage_pct": 0.05,
-  "min_signal_exit_profit_pct": 1.0
+  "min_signal_exit_profit_pct": 1.0,
+  "trend_tolerance_pct": 6,
+  "min_edge_pct": 3
 }

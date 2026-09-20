@@ -62,7 +62,7 @@
   <p class="subtitle">
     Two independent, free, rule-based paper-trading bots. Rebuilt automatically by GitHub Actions
     after every trading run - nothing on this page depends on Claude in any way.
-    Last rebuilt: <span class="local-time" data-utc="2026-09-20T01:00:44.684586+00:00">2026-09-20T01:00:44.684586+00:00</span>.
+    Last rebuilt: <span class="local-time" data-utc="2026-09-20T01:08:59.092788+00:00">2026-09-20T01:08:59.092788+00:00</span>.
   </p>
 
   <div class="tabs">
@@ -98,15 +98,23 @@
       <div class="params">
         <div><span>Rolling window: </span>96 bars (15-min)</div>
         <div><span>Trend filter window: </span>192 bars (15-min)</div>
-        <div><span>Entry z-score: </span>3.5</div>
+        <div><span>Entry z-score: </span>1.0</div>
         <div><span>Exit z-score: </span>0.0</div>
         <div><span>Stop-loss: </span>4%</div>
         <div><span>Take-profit: </span>8%</div>
-        <div><span>Min confidence: </span>50</div>
-        <div><span>Max position size: </span>15% of equity</div>
-        <div><span>Max total exposure: </span>75%</div>
+        <div><span>Min confidence: </span>30</div>
+        <div><span>Max position size: </span>2% of equity</div>
+        <div><span>Max total exposure: </span>12%</div>
         <div><span>Max daily loss: </span>5%</div>
+        <div><span>Trend tolerance: </span>6%</div>
+        <div><span>Min edge per trade: </span>3%</div>
+        <div><span>Trading fee (per side): </span>0.8%</div>
       </div>
+    </section>
+
+    <section>
+      <h2>Realized performance</h2>
+      <div class="params"><div><span>Completed round trips: </span>2</div><div><span>Win rate: </span>0.0%</div><div><span>Average win: </span>+0.00%</div><div><span>Average loss: </span>-2.91%</div><div><span>Expectancy per trade: </span><strong class="neg">-2.910%</strong></div></div><p class="muted">All figures are net of fees and slippage. Expectancy is average P/L per completed round trip - the strategy only makes money if this is above zero.</p>
     </section>
 
     <section>

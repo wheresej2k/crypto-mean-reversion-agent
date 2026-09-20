@@ -83,7 +83,7 @@ def main():
 
     # --- Generate signals, apply risk limits ---
     print("Generating signals (mean reversion, 15-minute bars from Kraken)...")
-    decisions = generate_signals(valid_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore, settings.trend_window)
+    decisions = generate_signals(valid_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore, settings.trend_window, settings.trend_tolerance_pct)
     decisions_by_symbol = {d.symbol: d for d in decisions}
 
     approved_buys, approved_sells, skipped = evaluate_decisions(
@@ -105,7 +105,11 @@ def main():
 
     for s in skipped:
         print(f"  SKIP  {s.symbol:10s} {s.action:5s} - {s.reason}")
-        log_row(s.symbol, s.action, "skipped", reasoning=s.reason)
+        # A --dry-run must not write to the real trade log. That log is the record the strategy
+        # gets reviewed against, so local test runs mixed into it would quietly corrupt the very
+        # history used to judge whether the bot is working.
+        if not args.dry_run:
+            log_row(s.symbol, s.action, "skipped", reasoning=s.reason)
 
     trades_executed = 0
 

@@ -30,7 +30,7 @@ from config import load_settings
 from kraken_client import BAR_MINUTES
 from models import Bar, PositionSnapshot
 from risk_manager import evaluate_decisions
-from strategy import decide, rolling_mean_std_series
+from strategy import decide, rolling_mean_std_series, trend_ok_for
 
 STARTING_CASH = 100_000.0
 BAR_TIMEFRAME = TimeFrame(BAR_MINUTES, TimeFrameUnit.Minute)
@@ -97,6 +97,12 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     trade_count = 0
     win_count = 0
     loss_count = 0
+    # Per-round-trip results, so the summary can show the PAYOFF SHAPE (average win vs average
+    # loss), not just a win rate. A win rate on its own is misleading: an exit rule that caps
+    # winners at a small profit floor while letting losers run to a full stop can show a 57% win
+    # rate and still have deeply negative expectancy.
+    trade_pls: list[float] = []
+    exit_reasons: dict[str, int] = {}
     equity_curve = []
     day_start_equity = STARTING_CASH
     day_start_date = None
@@ -133,6 +139,9 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
                 win_count += 1
             else:
                 loss_count += 1
+            trade_pls.append(pl_pct)
+            reason = "stop_loss" if exit_price <= pos["stop_price"] * (1 + slippage_pct / 100) else "take_profit"
+            exit_reasons[reason] = exit_reasons.get(reason, 0) + 1
             del positions[symbol]
             trade_count += 1
 
@@ -163,7 +172,7 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             if math.isnan(mean_i) or math.isnan(std_i) or math.isnan(trend_mean_i):
                 continue
             has_position = symbol in position_snapshots
-            trend_ok = closes_now[symbol] >= trend_mean_i
+            trend_ok = trend_ok_for(closes_now[symbol], trend_mean_i, getattr(settings, "trend_tolerance_pct", 0.0))
             decisions.append(decide(
                 symbol, closes_now[symbol], mean_i, std_i, has_position,
                 settings.window, settings.entry_zscore, settings.exit_zscore, trend_ok,
@@ -186,6 +195,8 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
                     win_count += 1
                 else:
                     loss_count += 1
+                trade_pls.append(pl_pct)
+                exit_reasons["signal_exit"] = exit_reasons.get("signal_exit", 0) + 1
                 remaining = pos["qty"] - sell_qty
                 if remaining > 1e-9:
                     pos["entry_notional"] *= 1 - fraction_sold
@@ -236,6 +247,12 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     completed_trades = win_count + loss_count
     win_rate_pct = (win_count / completed_trades * 100) if completed_trades else None
 
+    wins = [p for p in trade_pls if p > 0]
+    losses = [p for p in trade_pls if p <= 0]
+    avg_win_pct = sum(wins) / len(wins) if wins else None
+    avg_loss_pct = sum(losses) / len(losses) if losses else None
+    expectancy_pct = sum(trade_pls) / len(trade_pls) if trade_pls else None
+
     return {
         "symbols_used": list(bars_by_symbol.keys()),
         "bars_simulated": num_bars - start_index,
@@ -247,6 +264,10 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
         "max_drawdown_pct": max_drawdown_pct,
         "win_rate_pct": win_rate_pct,
         "completed_trades": completed_trades,
+        "avg_win_pct": avg_win_pct,
+        "avg_loss_pct": avg_loss_pct,
+        "expectancy_pct": expectancy_pct,
+        "exit_reasons": exit_reasons,
     }
 
 
@@ -272,6 +293,10 @@ def main():
     print(f"Total trades executed: {r['trade_count']} ({r['completed_trades']} completed round-trips)")
     if r["win_rate_pct"] is not None:
         print(f"Win rate:             {r['win_rate_pct']:.1f}%")
+        print(f"Average win:          {r['avg_win_pct']:+.2f}%  (net of fees and slippage)")
+        print(f"Average loss:         {r['avg_loss_pct']:+.2f}%  (net of fees and slippage)")
+        print(f"Expectancy per trade: {r['expectancy_pct']:+.3f}%")
+        print(f"Exits by reason:      {r['exit_reasons']}")
     else:
         print("Win rate:             n/a (no completed round-trip trades)")
 

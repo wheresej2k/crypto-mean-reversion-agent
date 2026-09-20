@@ -70,6 +70,8 @@ class Settings:
     trading_fee_pct: float = 0.80
     slippage_pct: float = 0.05
     min_signal_exit_profit_pct: float = 0.50
+    trend_tolerance_pct: float = 0.0
+    min_edge_pct: float = 0.0
 
 
 def load_params(path: Path = PARAMS_PATH) -> dict:
@@ -109,4 +111,6 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
         trading_fee_pct=float(params.get("trading_fee_pct", 0.80)),
         slippage_pct=float(params.get("slippage_pct", 0.05)),
         min_signal_exit_profit_pct=float(params.get("min_signal_exit_profit_pct", 0.50)),
+        trend_tolerance_pct=float(params.get("trend_tolerance_pct", 0.0)),
+        min_edge_pct=float(params.get("min_edge_pct", 0.0)),
     )

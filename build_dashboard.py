@@ -86,6 +86,44 @@ def build_closed_trades_table(trades):
     )
 
 
+def build_payoff_stats(trades):
+    """The numbers that actually say whether the strategy works: not the win rate on its own, but
+    the PAYOFF SHAPE. A rule that caps winners at a small profit floor while letting losers run to
+    a full stop can post a 57% win rate and still lose money every single trade. Expectancy is the
+    number to watch - it has to clear zero after fees before any of the rest matters.
+
+    dust_cleanup rows are excluded: they are sub-$1 residuals swept up for bookkeeping and are
+    recorded at 0.0%, so counting them would dilute both the win rate and the expectancy.
+    """
+    pls = []
+    for trade in trades:
+        if trade.get("action") != "CLOSE" or trade.get("exit_reason") == "dust_cleanup":
+            continue
+        value = trade.get("pl_pct")
+        if value not in (None, ""):
+            pls.append(float(value))
+    if not pls:
+        return '<p class="muted">No completed round trips yet.</p>'
+    wins = [p for p in pls if p > 0]
+    losses = [p for p in pls if p <= 0]
+    expectancy = sum(pls) / len(pls)
+    avg_win = sum(wins) / len(wins) if wins else 0.0
+    avg_loss = sum(losses) / len(losses) if losses else 0.0
+    exp_class = "pos" if expectancy >= 0 else "neg"
+    return (
+        '<div class="params">'
+        f'<div><span>Completed round trips: </span>{len(pls)}</div>'
+        f'<div><span>Win rate: </span>{len(wins) / len(pls) * 100:.1f}%</div>'
+        f'<div><span>Average win: </span>{avg_win:+.2f}%</div>'
+        f'<div><span>Average loss: </span>{avg_loss:+.2f}%</div>'
+        f'<div><span>Expectancy per trade: </span>'
+        f'<strong class="{exp_class}">{expectancy:+.3f}%</strong></div>'
+        '</div>'
+        '<p class="muted">All figures are net of fees and slippage. Expectancy is average P/L per '
+        'completed round trip - the strategy only makes money if this is above zero.</p>'
+    )
+
+
 def fmt_money(v):
     return f"${v:,.2f}"
 
@@ -308,7 +346,15 @@ def main():
         <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
         <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
         <div><span>Max daily loss: </span>{params.get('max_daily_loss_pct')}%</div>
+        <div><span>Trend tolerance: </span>{params.get('trend_tolerance_pct')}%</div>
+        <div><span>Min edge per trade: </span>{params.get('min_edge_pct')}%</div>
+        <div><span>Trading fee (per side): </span>{params.get('trading_fee_pct')}%</div>
       </div>
+    </section>
+
+    <section>
+      <h2>Realized performance</h2>
+      {build_payoff_stats(trades)}
     </section>
 
     <section>
