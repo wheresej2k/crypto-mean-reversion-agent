@@ -63,7 +63,8 @@ def simulate(bars_by_symbol, *, lookback, rebalance, regime_window, max_exposure
 
     for i in range(start, n):
         if (i - start) % rebalance == 0:
-            picks = select(closes, i, lookback, regime_window, max_names=max_names)
+            picks = select(closes, i, lookback, regime_window, max_names=max_names,
+                           bars_per_day=BARS_PER_DAY)
             chosen = [p.symbol for p in picks if p.selected]
 
             for symbol in list(qty):

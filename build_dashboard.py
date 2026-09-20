@@ -178,15 +178,16 @@ def build_positions_table(positions, live_prices):
             f"<td>{pos['qty']:.6f}</td>"
             f"<td>{fmt_money(pos['entry_price'])}</td>"
             f"<td>{fmt_money(current_price)}</td>"
-            f"<td>{fmt_money(pos['stop_price'])}</td>"
-            f"<td>{fmt_money(pos['target_price'])}</td>"
             f"<td class=\"{pl_class}\">{fmt_pct(pl_pct)}</td>"
             f"<td>{utc_span(pos.get('opened_at'))}</td>"
             "</tr>"
         )
+    # No Stop/Target columns: the momentum strategy has neither. Positions still carry the
+    # broker's bracket fields, but momentum_trader stores deliberately inert values (a 100% stop
+    # sits at price 0), so rendering them would show a $0.00 stop and a nonsense target.
     return (
         "<div class=\"table-scroll\"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th>"
-        f"<th>Current</th><th>Stop</th><th>Target</th><th>Unrealized P/L</th><th>Opened</th></tr></thead>"
+        f"<th>Current</th><th>Unrealized P/L</th><th>Opened</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
     )
 
@@ -243,7 +244,7 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crypto Bots - Kraken Mean-Reversion + Alpaca Trend-Following</title>
+<title>Crypto Bots - Kraken Momentum + Alpaca Trend-Following</title>
 <style>
   :root {{
     color-scheme: light dark;
@@ -306,7 +307,7 @@ def main():
   </p>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
+    <button class="tab-btn active" data-tab="kraken">Momentum (Kraken)</button>
     <a class="tab-btn" href="{SIBLING_DASHBOARD_URL}" target="_top">Trend-Following (Alpaca)</a>
   </div>
 
@@ -336,20 +337,22 @@ def main():
     <section>
       <h2>Live strategy parameters</h2>
       <div class="params">
-        <div><span>Rolling window: </span>{params.get('window')} bars (15-min)</div>
-        <div><span>Trend filter window: </span>{params.get('trend_window')} bars (15-min)</div>
-        <div><span>Entry z-score: </span>{params.get('entry_zscore')}</div>
-        <div><span>Exit z-score: </span>{params.get('exit_zscore')}</div>
-        <div><span>Stop-loss: </span>{params.get('stop_loss_pct')}%</div>
-        <div><span>Take-profit: </span>{params.get('take_profit_pct')}%</div>
-        <div><span>Min confidence: </span>{params.get('min_confidence')}</div>
-        <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
-        <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
-        <div><span>Max daily loss: </span>{params.get('max_daily_loss_pct')}%</div>
-        <div><span>Trend tolerance: </span>{params.get('trend_tolerance_pct')}%</div>
-        <div><span>Min edge per trade: </span>{params.get('min_edge_pct')}%</div>
+        <div><span>Momentum lookback: </span>{params.get('momentum_lookback_days')} days</div>
+        <div><span>Rebalances every: </span>{params.get('momentum_rebalance_days')} days</div>
+        <div><span>Regime filter: </span>{params.get('momentum_regime_days')}-day average</div>
+        <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}% of equity</div>
+        <div><span>Stop-loss / take-profit: </span>none, by design</div>
         <div><span>Trading fee (per side): </span>{params.get('trading_fee_pct')}%</div>
       </div>
+      <p class="muted" style="margin-top:12px;">
+        Holds each coin whose {params.get('momentum_lookback_days')}-day return is positive and
+        whose price is above its {params.get('momentum_regime_days')}-day average, equal-weight,
+        rechecked every {params.get('momentum_rebalance_days')} days. There is deliberately no
+        stop-loss and no take-profit - the exit is simply that momentum turned negative at the next
+        rebalance. Capping winners is what made the previous mean-reversion strategy lose money.
+        Expect roughly 7-30 trades a year, not daily activity: low turnover is what lets it clear
+        the ~1.65% round-trip cost.
+      </p>
     </section>
 
     <section>

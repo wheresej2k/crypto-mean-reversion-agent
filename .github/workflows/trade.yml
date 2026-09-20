@@ -42,7 +42,11 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run trading bot
-        run: python trader.py
+        # Switched from trader.py (mean reversion) to momentum on 2026-09-19 - see
+        # docs/momentum_research_2026-09-19.md. Still triggered every 15 minutes: momentum only
+        # rebalances every 14 days, but frequent no-op runs keep the watchdog heartbeat alive and
+        # cost nothing.
+        run: python momentum_trader.py
 
       - name: Rebuild the static dashboard (docs/index.html, served by GitHub Pages)
         run: python build_dashboard.py

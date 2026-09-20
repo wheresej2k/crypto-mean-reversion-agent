@@ -72,6 +72,11 @@ class Settings:
     min_signal_exit_profit_pct: float = 0.50
     trend_tolerance_pct: float = 0.0
     min_edge_pct: float = 0.0
+    # Momentum strategy (momentum_trader.py). Days, because it trades daily bars.
+    momentum_lookback_days: int = 56
+    momentum_rebalance_days: int = 14
+    momentum_regime_days: int = 150
+    momentum_max_names: int | None = None
 
 
 def load_params(path: Path = PARAMS_PATH) -> dict:
@@ -113,4 +118,9 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
         min_signal_exit_profit_pct=float(params.get("min_signal_exit_profit_pct", 0.50)),
         trend_tolerance_pct=float(params.get("trend_tolerance_pct", 0.0)),
         min_edge_pct=float(params.get("min_edge_pct", 0.0)),
+        momentum_lookback_days=int(params.get("momentum_lookback_days", 56)),
+        momentum_rebalance_days=int(params.get("momentum_rebalance_days", 14)),
+        momentum_regime_days=int(params.get("momentum_regime_days", 150)),
+        momentum_max_names=(int(params["momentum_max_names"])
+                            if params.get("momentum_max_names") else None),
     )

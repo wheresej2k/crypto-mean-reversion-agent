@@ -1,7 +1,64 @@
 {
-  "cash": 97965.34779220037,
+  "cash": 68340.63099220034,
   "starting_cash": 100000.0,
   "day_start_equity": 97965.34779220037,
   "day_start_date": "2026-09-20",
-  "positions": {}
+  "positions": {
+    "SOL/USD": {
+      "qty": 52.91823553184676,
+      "entry_price": 111.07551,
+      "entry_notional": 5877.92,
+      "entry_fee": 47.023360000000004,
+      "stop_price": 0.0,
+      "target_price": 1110866.17551,
+      "trade_id": "5d53f62d",
+      "opened_at": "2026-09-20T01:39:45+00:00",
+      "checked_through": "2026-09-20T01:39:45+00:00"
+    },
+    "LINK/USD": {
+      "qty": 472.6838229611277,
+      "entry_price": 12.435204495,
+      "entry_notional": 5877.92,
+      "entry_fee": 47.023360000000004,
+      "stop_price": 0.0,
+      "target_price": 124364.480154495,
+      "trade_id": "7be4003f",
+      "opened_at": "2026-09-20T01:39:45+00:00",
+      "checked_through": "2026-09-20T01:39:45+00:00"
+    },
+    "ETH/USD": {
+      "qty": 2.2325179110203592,
+      "entry_price": 2632.865775,
+      "entry_notional": 5877.92,
+      "entry_fee": 47.023360000000004,
+      "stop_price": 0.0,
+      "target_price": 26331290.615775,
+      "trade_id": "4d35b9ad",
+      "opened_at": "2026-09-20T01:39:45+00:00",
+      "checked_through": "2026-09-20T01:39:45+00:00"
+    },
+    "BTC/USD": {
+      "qty": 0.07232839662850951,
+      "entry_price": 81267.11325,
+      "entry_notional": 5877.92,
+      "entry_fee": 47.023360000000004,
+      "stop_price": 0.0,
+      "target_price": 812752399.6132499,
+      "trade_id": "3bc511c6",
+      "opened_at": "2026-09-20T01:39:45+00:00",
+      "checked_through": "2026-09-20T01:39:45+00:00"
+    },
+    "DOGE/USD": {
+      "qty": 66993.28136629787,
+      "entry_price": 0.08773894754999999,
+      "entry_notional": 5877.92,
+      "entry_fee": 47.023360000000004,
+      "stop_price": 0.0,
+      "target_price": 877.4772144475498,
+      "trade_id": "14f2736e",
+      "opened_at": "2026-09-20T01:39:45+00:00",
+      "checked_through": "2026-09-20T01:39:45+00:00"
+    }
+  },
+  "last_rebalance_date": "2026-09-20"
 }

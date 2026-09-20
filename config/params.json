@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-09-19 revision. Set from a measured sweep over 5 years of 15-minute bars, not from defaults. The 2026-09-16 settings (entry_zscore 3.5) were unreachable: across 418 live runs and 1,922 logged z-score observations the lowest reading ever seen was -2.95, so no BUY could physically fire - that is why the bot went 2 days without a trade. It also only produced 9 round trips in 5 years of backtest. These settings are chosen for DATA COLLECTION at a survivable bleed rate, not for profit: the sweep found no profitable configuration of this strategy at Kraken's 0.80%/side taker fee, and the user chose daily activity over capital preservation with that tradeoff stated explicitly. See docs/strategy_review_2026-09-19.md for the full evidence.",
+  "_comment": "2026-09-19: LIVE STRATEGY IS NOW TIME-SERIES MOMENTUM (momentum_trader.py), not mean reversion. The mean-reversion settings below are kept because backtest.py/tune.py still use them, but trader.py is no longer what runs live. Reason: a ~2,000-combination sweep found NO profitable mean-reversion configuration at Kraken's 0.80%-per-side taker fee - a round trip costs ~1.65% and the average 15-minute reversion on these coins is smaller than that. Momentum beat buy & hold in 26 of 27 tested parameter combinations with positive expectancy in all 27. See docs/momentum_research_2026-09-19.md. NOTE: momentum trades ~7-30 times a YEAR, not daily - low turnover is precisely why it clears the fee.",
   "window": 96,
   "trend_window": 192,
   "entry_zscore": 1.0,
@@ -8,12 +8,16 @@
   "take_profit_pct": 8,
   "min_confidence": 30,
   "max_position_pct": 2,
-  "max_total_exposure_pct": 12,
+  "max_total_exposure_pct": 30,
   "max_daily_loss_pct": 5,
   "max_trades_per_run": 5,
   "trading_fee_pct": 0.8,
   "slippage_pct": 0.05,
   "min_signal_exit_profit_pct": 1.0,
   "trend_tolerance_pct": 6,
-  "min_edge_pct": 3
+  "min_edge_pct": 3,
+  "momentum_lookback_days": 56,
+  "momentum_rebalance_days": 14,
+  "momentum_regime_days": 150,
+  "momentum_max_names": null
 }

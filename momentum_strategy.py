@@ -88,12 +88,21 @@ def select(
     regime_window: int,
     threshold: float = 0.0,
     max_names: int | None = None,
+    bars_per_day: int = 1,
 ) -> list[MomentumPick]:
     """Decide what to hold at `index`. Returns a pick per symbol, including the rejected ones and
-    why, so a live run could log its reasoning the same way the mean-reversion bot does.
+    why, so a live run can log its reasoning the same way the mean-reversion bot did.
+
+    `lookback` and `regime_window` are counts of BARS, whatever size those bars are.
+    `bars_per_day` only converts them into days for the human-readable reason strings: the live
+    trader runs on daily bars and passes 1, while momentum_backtest.py runs on 15-minute bars and
+    passes 96. Getting it wrong mislabels the reasons (a 56-day lookback printed as "1-day") but
+    never changes a decision.
 
     Uses only data at or before `index` - no lookahead.
     """
+    lookback_days = lookback / bars_per_day
+    regime_days = regime_window / bars_per_day
     picks: list[MomentumPick] = []
     scored: list[tuple[float, str]] = []
 
@@ -110,13 +119,13 @@ def select(
         if r <= threshold:
             picks.append(MomentumPick(
                 symbol, r * 100, regime, False,
-                f"{lookback / BARS_PER_DAY:.0f}-day return {r * 100:+.2f}% is not positive momentum"))
+                f"{lookback_days:.0f}-day return {r * 100:+.2f}% is not positive momentum"))
             continue
         if not regime:
             picks.append(MomentumPick(
                 symbol, r * 100, False, False,
                 f"momentum is {r * 100:+.2f}% but price is below its "
-                f"{regime_window / BARS_PER_DAY:.0f}-day average - sitting out a bear regime"))
+                f"{regime_days:.0f}-day average - sitting out a bear regime"))
             continue
         scored.append((r, symbol))
 
@@ -128,8 +137,8 @@ def select(
         if symbol in kept_symbols:
             picks.append(MomentumPick(
                 symbol, r * 100, True, True,
-                f"{lookback / BARS_PER_DAY:.0f}-day return {r * 100:+.2f}% and above its "
-                f"{regime_window / BARS_PER_DAY:.0f}-day average"))
+                f"{lookback_days:.0f}-day return {r * 100:+.2f}% and above its "
+                f"{regime_days:.0f}-day average"))
         else:
             picks.append(MomentumPick(symbol, r * 100, True, False,
                                       f"positive momentum but outside the top {max_names}"))

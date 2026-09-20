@@ -86,6 +86,47 @@ def get_recent_bars(symbol: str, bars: int = DEFAULT_FETCH_BARS) -> list[Bar]:
     return parsed[-bars:]
 
 
+DAILY_INTERVAL_MINUTES = 1440
+
+
+@retry(times=3, base_delay=2.0)
+def get_daily_bars(symbol: str, bars: int = 400) -> list[Bar]:
+    """DAILY bars for `symbol`, oldest first, same "drop the unclosed candle" rule as above.
+
+    The momentum strategy needs a 150-day regime filter plus a 56-day lookback. At the 15-minute
+    interval that is ~14,400 candles, and Kraken returns at most ~721 per call - so it is simply
+    unreachable at that granularity. Daily candles cover ~2 years in a single call, which is
+    ample, and a multi-week momentum rule has no use for intraday resolution anyway.
+    """
+    pair = SYMBOL_MAP.get(symbol)
+    if pair is None:
+        raise KrakenDataError(f"no Kraken pair mapping for {symbol} - add it to SYMBOL_MAP")
+
+    resp = requests.get(
+        f"{KRAKEN_API}/OHLC",
+        params={"pair": pair, "interval": DAILY_INTERVAL_MINUTES},
+        timeout=15,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    if data.get("error"):
+        raise KrakenDataError(f"Kraken API error for {symbol}: {data['error']}")
+
+    result = data["result"]
+    key = next(k for k in result if k != "last")
+    candles = result[key][:-1]  # drop today's still-open candle
+
+    parsed = [
+        Bar(
+            timestamp=datetime.fromtimestamp(int(c[0]), tz=timezone.utc),
+            open=float(c[1]), high=float(c[2]), low=float(c[3]), close=float(c[4]),
+            volume=float(c[6]),
+        )
+        for c in candles
+    ]
+    return parsed[-bars:]
+
+
 @retry(times=3, base_delay=2.0)
 def get_current_price(symbol: str) -> float:
     """Live last-trade price for `symbol`, used by build_dashboard.py to mark open positions to
