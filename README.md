@@ -125,7 +125,12 @@ quality).
 
 ### Current cost-aware paper settings (2026-09-17)
 
-**Read `docs/strategy_review_2026-09-19.md` before trusting any of this.** A sweep of ~2,000
+**Read `docs/strategy_review_2026-09-19.md` before trusting any of this**, and
+`docs/momentum_research_2026-09-19.md` for the follow-up: a time-series momentum strategy measured
+on the same data and the same fees returned **+66% over 5 years with +22.3% expectancy per trade**,
+against this strategy's -1.38%. It is **not live** (`momentum_strategy.py` / `momentum_backtest.py`
+are research only) and it trades about once a week rather than daily, so it does not replace this
+bot's job - but it is the more promising direction. A sweep of ~2,000
 configurations across 3-month, 1-year and 5-year windows found **no profitable setting of this
 strategy at Kraken's 0.80%-per-side taker fee**. The reason is arithmetic rather than tuning: a
 round trip costs ~1.65%, and the average reversion available on a 15-minute chart for these coins
