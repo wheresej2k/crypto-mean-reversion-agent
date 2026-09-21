@@ -1,19 +1,7 @@
 {
-  "cash": 95398.5829848846,
+  "cash": 97378.99754546279,
   "starting_cash": 100000.0,
   "day_start_equity": 97350.77874929493,
   "day_start_date": "2026-09-21",
-  "positions": {
-    "SOL/USD": {
-      "qty": 17.724592580646778,
-      "entry_price": 109.75484999999999,
-      "entry_notional": 1945.36,
-      "entry_fee": 15.56288,
-      "stop_price": 105.36465599999998,
-      "target_price": 118.53523799999999,
-      "trade_id": "7a266d30",
-      "opened_at": "2026-09-20T02:30:50+00:00",
-      "checked_through": "2026-09-21T00:45:00+00:00"
-    }
-  }
+  "positions": {}
 }
