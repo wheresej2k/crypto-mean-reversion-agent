@@ -89,8 +89,27 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     if trend_mean_by_symbol is None:
         trend_mean_by_symbol = {s: rolling_mean_std_series(c, settings.trend_window)[0] for s, c in closes_by_symbol.items()}
 
-    num_bars = min(len(b) for b in bars_by_symbol.values())
-    start_index = required_window
+    # Step every symbol on a SHARED TIMESTAMP GRID, not by list index.
+    #
+    # This used to be `for i in range(required_window, min(len(bars)))`, indexing every symbol's
+    # own list at the same position i. That silently assumed all symbols have a bar at every
+    # 15-minute slot, which is false: coins have gaps (thin liquidity, listing dates), so bar i
+    # is a DIFFERENT calendar moment for each coin. Measured on the live five over one year,
+    # their bar 0 timestamps spanned 27 hours. That corrupts everything portfolio-level - equity,
+    # the exposure caps, the daily-loss circuit breaker, the day boundary - because it marks
+    # positions at prices from different moments, and it makes any "% of days that traded"
+    # statistic meaningless. The error grows with the size of the watchlist, so widening the
+    # watchlist made fixing this a prerequisite, not a nicety.
+    #
+    # momentum_trader.aligned_closes() already fixed the same bug on the momentum path (it
+    # intersects dates); this uses the union of timestamps instead, so a coin with a shorter
+    # history or an occasional gap still contributes on the bars it does have rather than
+    # truncating every other coin down to its overlap.
+    grid = sorted({b.timestamp for bars in bars_by_symbol.values() for b in bars})
+    index_at = {}
+    for s, bars in bars_by_symbol.items():
+        lookup = {b.timestamp: i for i, b in enumerate(bars)}
+        index_at[s] = [lookup.get(t) for t in grid]
 
     cash = STARTING_CASH
     positions: dict[str, dict] = {}
@@ -118,11 +137,27 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     def fee(notional):
         return notional * fee_pct / 100
 
-    for i in range(start_index, num_bars):
+    entry_days: set = set()
+    all_days: set = set()
+
+    for gi, grid_ts in enumerate(grid):
+        # Which symbols actually have a closed bar at this moment, and have enough of their own
+        # history behind it for the rolling windows to be defined.
+        live = {}
+        for s in bars_by_symbol:
+            idx = index_at[s][gi]
+            if idx is not None and idx >= required_window:
+                live[s] = idx
+        if not live:
+            continue
+        all_days.add(grid_ts.date())
+
         # Check every open position's stop-loss/take-profit against this bar's low/high - the
         # exact same trigger condition paper_broker.py's live reconciliation uses.
         for symbol in list(positions.keys()):
-            bar_now = bars_by_symbol[symbol][i]
+            if symbol not in live:
+                continue  # no bar for this coin at this moment - cannot mark or trigger it
+            bar_now = bars_by_symbol[symbol][live[symbol]]
             pos = positions[symbol]
             if bar_now.low <= pos["stop_price"]:
                 exit_price = sell_fill(pos["stop_price"])
@@ -145,12 +180,14 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
             del positions[symbol]
             trade_count += 1
 
-        closes_now = {s: closes_by_symbol[s][i] for s in bars_by_symbol}
+        closes_now = {s: closes_by_symbol[s][idx] for s, idx in live.items()}
 
         def snapshot_positions():
             snapshots = {}
             for symbol, pos in positions.items():
-                price = closes_now[symbol]
+                # A position in a coin with no bar right now keeps its last known entry-based
+                # mark rather than crashing; it is re-marked as soon as that coin prints again.
+                price = closes_now.get(symbol, pos["entry_price"])
                 market_value = pos["qty"] * price
                 unrealized_plpc = (price - pos["entry_price"]) / pos["entry_price"] * 100
                 snapshots[symbol] = PositionSnapshot(symbol, pos["qty"], market_value, pos["entry_price"], unrealized_plpc)
@@ -158,17 +195,17 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
 
         position_snapshots = snapshot_positions()
         equity = cash + sum(p.market_value for p in position_snapshots.values())
-        bar_date = bars_by_symbol[next(iter(bars_by_symbol))][i].timestamp.date()
+        bar_date = grid_ts.date()
         if day_start_date != bar_date:
             day_start_date = bar_date
             day_start_equity = equity
         day_pl_pct = (equity - day_start_equity) / day_start_equity * 100 if day_start_equity else 0.0
 
         decisions = []
-        for symbol in bars_by_symbol:
+        for symbol, idx in live.items():
             mean, std = mean_std_by_symbol[symbol]
-            mean_i, std_i = mean[i], std[i]
-            trend_mean_i = trend_mean_by_symbol[symbol][i]
+            mean_i, std_i = mean[idx], std[idx]
+            trend_mean_i = trend_mean_by_symbol[symbol][idx]
             if math.isnan(mean_i) or math.isnan(std_i) or math.isnan(trend_mean_i):
                 continue
             has_position = symbol in position_snapshots
@@ -223,6 +260,7 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
                 "target_price": price * (1 + settings.take_profit_pct / 100),
             }
             trade_count += 1
+            entry_days.add(bar_date)
 
         position_snapshots = snapshot_positions()
         equity = cash + sum(p.market_value for p in position_snapshots.values())
@@ -233,7 +271,7 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
 
     per_symbol_alloc = STARTING_CASH / len(bars_by_symbol)
     buy_hold_final = sum(
-        per_symbol_alloc / closes_by_symbol[s][start_index] * closes_by_symbol[s][num_bars - 1]
+        per_symbol_alloc / closes_by_symbol[s][required_window] * closes_by_symbol[s][-1]
         for s in bars_by_symbol
     )
     buy_hold_return_pct = (buy_hold_final - STARTING_CASH) / STARTING_CASH * 100
@@ -253,9 +291,21 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     avg_loss_pct = sum(losses) / len(losses) if losses else None
     expectancy_pct = sum(trade_pls) / len(trade_pls) if trade_pls else None
 
+    # Calendar activity, tracked as a first-class result rather than inferred from trade_count:
+    # "does this trade most days" is an explicit objective for this bot, and a pure return
+    # ranking will always prefer the configuration that barely trades.
+    sorted_days = sorted(all_days)
+    longest_dry_spell = current_dry = 0
+    for d in sorted_days:
+        current_dry = 0 if d in entry_days else current_dry + 1
+        longest_dry_spell = max(longest_dry_spell, current_dry)
+
     return {
         "symbols_used": list(bars_by_symbol.keys()),
-        "bars_simulated": num_bars - start_index,
+        "bars_simulated": len(equity_curve),
+        "days_covered": len(sorted_days),
+        "days_with_entry_pct": (len(entry_days) / len(sorted_days) * 100) if sorted_days else 0.0,
+        "longest_dry_spell_days": longest_dry_spell,
         "starting_equity": STARTING_CASH,
         "final_equity": final_equity,
         "total_return_pct": total_return_pct,
@@ -299,6 +349,8 @@ def main():
         print(f"Exits by reason:      {r['exit_reasons']}")
     else:
         print("Win rate:             n/a (no completed round-trip trades)")
+    print(f"Days with an entry:   {r['days_with_entry_pct']:.1f}% of {r['days_covered']} days")
+    print(f"Longest dry spell:    {r['longest_dry_spell_days']} days with no entry")
 
 
 if __name__ == "__main__":
