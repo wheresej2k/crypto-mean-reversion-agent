@@ -1,30 +1,52 @@
 {
-  "cash": 93453.33146546279,
+  "cash": 89325.27409878118,
   "starting_cash": 100000.0,
   "day_start_equity": 97378.99754546279,
   "day_start_date": "2026-09-23",
   "positions": {
+    "ETH/USD": {
+      "qty": 0.7257802974360612,
+      "entry_price": 2677.408035,
+      "entry_notional": 1943.21,
+      "entry_fee": 15.545680000000003,
+      "stop_price": 2570.3117135999996,
+      "target_price": 2891.6006778,
+      "trade_id": "4d8ae8b8",
+      "opened_at": "2026-09-23T14:15:39+00:00",
+      "checked_through": "2026-09-23T14:15:39+00:00"
+    },
+    "SOL/USD": {
+      "qty": 16.939114604567592,
+      "entry_price": 114.71732999999999,
+      "entry_notional": 1943.21,
+      "entry_fee": 15.545680000000003,
+      "stop_price": 110.12863679999998,
+      "target_price": 123.8947164,
+      "trade_id": "dcccfd02",
+      "opened_at": "2026-09-23T14:15:39+00:00",
+      "checked_through": "2026-09-23T14:15:39+00:00"
+    },
     "LINK/USD": {
-      "qty": 152.86998922953308,
-      "entry_price": 12.740106869999998,
-      "entry_notional": 1947.58,
-      "entry_fee": 15.58064,
-      "stop_price": 12.230502595199997,
-      "target_price": 13.759315419599998,
-      "trade_id": "9cb84c62",
-      "opened_at": "2026-09-23T11:30:53+00:00",
-      "checked_through": "2026-09-23T13:45:00+00:00"
+      "qty": 156.4530038632953,
+      "entry_price": 12.420407099999998,
+      "entry_notional": 1943.21,
+      "entry_fee": 15.545680000000003,
+      "stop_price": 11.923590815999997,
+      "target_price": 13.414039668,
+      "trade_id": "9793cc8e",
+      "opened_at": "2026-09-23T14:15:39+00:00",
+      "checked_through": "2026-09-23T14:15:39+00:00"
     },
     "DOGE/USD": {
-      "qty": 19723.390283322275,
-      "entry_price": 0.09871173119999999,
-      "entry_notional": 1946.93,
-      "entry_fee": 15.57544,
-      "stop_price": 0.09476326195199998,
-      "target_price": 0.106608669696,
-      "trade_id": "2b7ad5ae",
-      "opened_at": "2026-09-23T13:15:50+00:00",
-      "checked_through": "2026-09-23T13:45:00+00:00"
+      "qty": 20169.005033943733,
+      "entry_price": 0.09634634909999999,
+      "entry_notional": 1943.21,
+      "entry_fee": 15.545680000000003,
+      "stop_price": 0.09249249513599998,
+      "target_price": 0.104054057028,
+      "trade_id": "6ba24a24",
+      "opened_at": "2026-09-23T14:15:39+00:00",
+      "checked_through": "2026-09-23T14:15:39+00:00"
     }
   }
 }
