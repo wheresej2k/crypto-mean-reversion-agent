@@ -3933,3 +3933,8 @@ timestamp_utc,symbol,action,status,amount,confidence,reasoning,rolling_mean,zsco
 2026-09-23T11:15:34+00:00,SOL/USD,BUY,skipped,,,reversion target 0.71% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
 2026-09-23T11:15:34+00:00,LINK/USD,BUY,skipped,,,reversion target 1.11% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
 2026-09-23T11:15:34+00:00,DOGE/USD,HOLD,skipped,,,price is -0.57 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-09-23T11:30:53+00:00,BTC/USD,BUY,skipped,,,reversion target 0.94% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-23T11:30:53+00:00,ETH/USD,BUY,skipped,,,reversion target 1.12% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-23T11:30:53+00:00,SOL/USD,BUY,skipped,,,reversion target 1.17% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-23T11:30:53+00:00,DOGE/USD,BUY,skipped,,,reversion target 1.37% is below the 1.65% minimum edge (round-trip cost 1.65%),,,,,,,,
+2026-09-23T11:30:53+00:00,LINK/USD,BUY,executed,1947.58,100.0,"price ($12.7337) is 3.23 standard deviations below its 96-bar average ($12.9997) - likely oversold, buying the dip",12.999749,-3.2319,,9cb84c62,,12.740107,,
