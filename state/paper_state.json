@@ -1,5 +1,5 @@
 {
-  "cash": 95415.83690546278,
+  "cash": 93453.33146546279,
   "starting_cash": 100000.0,
   "day_start_equity": 97378.99754546279,
   "day_start_date": "2026-09-23",
@@ -13,7 +13,18 @@
       "target_price": 13.759315419599998,
       "trade_id": "9cb84c62",
       "opened_at": "2026-09-23T11:30:53+00:00",
-      "checked_through": "2026-09-23T12:45:00+00:00"
+      "checked_through": "2026-09-23T13:00:00+00:00"
+    },
+    "DOGE/USD": {
+      "qty": 19723.390283322275,
+      "entry_price": 0.09871173119999999,
+      "entry_notional": 1946.93,
+      "entry_fee": 15.57544,
+      "stop_price": 0.09476326195199998,
+      "target_price": 0.106608669696,
+      "trade_id": "2b7ad5ae",
+      "opened_at": "2026-09-23T13:15:50+00:00",
+      "checked_through": "2026-09-23T13:15:50+00:00"
     }
   }
 }
