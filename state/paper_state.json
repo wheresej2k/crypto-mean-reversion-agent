@@ -13,7 +13,7 @@
       "target_price": 2891.6006778,
       "trade_id": "4d8ae8b8",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-09-24T16:30:00+00:00"
+      "checked_through": "2026-09-24T16:45:00+00:00"
     },
     "SOL/USD": {
       "qty": 16.939114604567592,
@@ -24,7 +24,7 @@
       "target_price": 123.8947164,
       "trade_id": "dcccfd02",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-09-24T16:30:00+00:00"
+      "checked_through": "2026-09-24T16:45:00+00:00"
     },
     "BTC/USD": {
       "qty": 0.023076912497442727,
@@ -35,7 +35,7 @@
       "target_price": 90776.597616,
       "trade_id": "e4892e7f",
       "opened_at": "2026-09-23T14:30:46+00:00",
-      "checked_through": "2026-09-24T16:30:00+00:00"
+      "checked_through": "2026-09-24T16:45:00+00:00"
     }
   }
 }
