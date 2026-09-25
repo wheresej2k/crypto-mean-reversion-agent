@@ -1,5 +1,5 @@
 {
-  "cash": 91231.93302474818,
+  "cash": 93215.94998738616,
   "starting_cash": 100000.0,
   "day_start_equity": 97111.72393879098,
   "day_start_date": "2026-09-25",
@@ -13,18 +13,7 @@
       "target_price": 2891.6006778,
       "trade_id": "4d8ae8b8",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-09-25T01:45:00+00:00"
-    },
-    "SOL/USD": {
-      "qty": 16.939114604567592,
-      "entry_price": 114.71732999999999,
-      "entry_notional": 1943.21,
-      "entry_fee": 15.545680000000003,
-      "stop_price": 110.12863679999998,
-      "target_price": 123.8947164,
-      "trade_id": "dcccfd02",
-      "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-09-25T01:45:00+00:00"
+      "checked_through": "2026-09-25T02:00:00+00:00"
     },
     "BTC/USD": {
       "qty": 0.023076912497442727,
@@ -35,7 +24,7 @@
       "target_price": 90776.597616,
       "trade_id": "e4892e7f",
       "opened_at": "2026-09-23T14:30:46+00:00",
-      "checked_through": "2026-09-25T01:45:00+00:00"
+      "checked_through": "2026-09-25T02:00:00+00:00"
     }
   }
 }
