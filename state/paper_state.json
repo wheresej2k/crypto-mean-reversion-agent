@@ -1,8 +1,8 @@
 {
   "cash": 93215.94998738616,
   "starting_cash": 100000.0,
-  "day_start_equity": 97111.72393879098,
-  "day_start_date": "2026-09-25",
+  "day_start_equity": 97109.82790125691,
+  "day_start_date": "2026-09-26",
   "positions": {
     "ETH/USD": {
       "qty": 0.7257802974360612,
@@ -13,7 +13,7 @@
       "target_price": 2891.6006778,
       "trade_id": "4d8ae8b8",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-09-25T23:30:00+00:00"
+      "checked_through": "2026-09-25T23:45:00+00:00"
     },
     "BTC/USD": {
       "qty": 0.023076912497442727,
@@ -24,7 +24,7 @@
       "target_price": 90776.597616,
       "trade_id": "e4892e7f",
       "opened_at": "2026-09-23T14:30:46+00:00",
-      "checked_through": "2026-09-25T23:30:00+00:00"
+      "checked_through": "2026-09-25T23:45:00+00:00"
     }
   }
 }
