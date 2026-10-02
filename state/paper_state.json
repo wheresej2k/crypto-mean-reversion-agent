@@ -1,20 +1,9 @@
 {
-  "cash": 91276.549670844,
+  "cash": 93262.79244071437,
   "starting_cash": 100000.0,
   "day_start_equity": 97034.70393103712,
   "day_start_date": "2026-10-02",
   "positions": {
-    "ETH/USD": {
-      "qty": 0.7257802974360612,
-      "entry_price": 2677.408035,
-      "entry_notional": 1943.21,
-      "entry_fee": 15.545680000000003,
-      "stop_price": 2570.3117135999996,
-      "target_price": 2891.6006778,
-      "trade_id": "4d8ae8b8",
-      "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-10-02T08:00:00+00:00"
-    },
     "SOL/USD": {
       "qty": 16.141712909347056,
       "entry_price": 120.30011999999999,
@@ -24,7 +13,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T08:00:00+00:00"
+      "checked_through": "2026-10-02T08:15:00+00:00"
     },
     "DOGE/USD": {
       "qty": 20424.42032739915,
@@ -35,7 +24,7 @@
       "target_price": 0.102680906796,
       "trade_id": "6c3ceadd",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T08:00:00+00:00"
+      "checked_through": "2026-10-02T08:15:00+00:00"
     }
   }
 }
