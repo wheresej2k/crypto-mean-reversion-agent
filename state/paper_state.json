@@ -1,5 +1,5 @@
 {
-  "cash": 89297.03029704238,
+  "cash": 91276.549670844,
   "starting_cash": 100000.0,
   "day_start_equity": 97034.70393103712,
   "day_start_date": "2026-10-02",
@@ -13,7 +13,7 @@
       "target_price": 2891.6006778,
       "trade_id": "4d8ae8b8",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-10-02T04:30:00+00:00"
+      "checked_through": "2026-10-02T04:45:00+00:00"
     },
     "SOL/USD": {
       "qty": 16.141712909347056,
@@ -24,7 +24,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T04:30:00+00:00"
+      "checked_through": "2026-10-02T04:45:00+00:00"
     },
     "DOGE/USD": {
       "qty": 20424.42032739915,
@@ -35,18 +35,7 @@
       "target_price": 0.102680906796,
       "trade_id": "6c3ceadd",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T04:30:00+00:00"
-    },
-    "LINK/USD": {
-      "qty": 136.4026186580299,
-      "entry_price": 14.222307599999999,
-      "entry_notional": 1939.96,
-      "entry_fee": 15.519680000000001,
-      "stop_price": 13.653415295999999,
-      "target_price": 15.360092208,
-      "trade_id": "6f876a7a",
-      "opened_at": "2026-09-30T14:30:43+00:00",
-      "checked_through": "2026-10-02T04:30:00+00:00"
+      "checked_through": "2026-10-02T04:45:00+00:00"
     }
   }
 }
