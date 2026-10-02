@@ -13,7 +13,7 @@
       "target_price": 2891.6006778,
       "trade_id": "4d8ae8b8",
       "opened_at": "2026-09-23T14:15:39+00:00",
-      "checked_through": "2026-10-02T07:45:00+00:00"
+      "checked_through": "2026-10-02T08:00:00+00:00"
     },
     "SOL/USD": {
       "qty": 16.141712909347056,
@@ -24,7 +24,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T07:45:00+00:00"
+      "checked_through": "2026-10-02T08:00:00+00:00"
     },
     "DOGE/USD": {
       "qty": 20424.42032739915,
@@ -35,7 +35,7 @@
       "target_price": 0.102680906796,
       "trade_id": "6c3ceadd",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-02T07:45:00+00:00"
+      "checked_through": "2026-10-02T08:00:00+00:00"
     }
   }
 }
