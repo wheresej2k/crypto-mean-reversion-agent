@@ -9274,3 +9274,8 @@ timestamp_utc,symbol,action,status,amount,confidence,reasoning,rolling_mean,zsco
 2026-10-04T01:00:46+00:00,SOL/USD,SELL,skipped,,,signal exit below fee-adjusted profit floor ($120.1600 < $123.4881),,,,,,,,
 2026-10-04T01:00:46+00:00,LINK/USD,HOLD,skipped,,,price is +1.98 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
 2026-10-04T01:00:46+00:00,DOGE/USD,HOLD,skipped,,,price is -0.43 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-10-04T01:15:39+00:00,BTC/USD,SELL,skipped,,,signal exit below fee-adjusted profit floor ($84765.3000 < $86278.1507),,,,,,,,
+2026-10-04T01:15:39+00:00,ETH/USD,SELL,skipped,,,signal exit below fee-adjusted profit floor ($2693.4100 < $2728.1477),,,,,,,,
+2026-10-04T01:15:39+00:00,SOL/USD,SELL,skipped,,,signal exit below fee-adjusted profit floor ($120.1300 < $123.4881),,,,,,,,
+2026-10-04T01:15:39+00:00,LINK/USD,HOLD,skipped,,,price is +2.21 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-10-04T01:15:39+00:00,DOGE/USD,HOLD,skipped,,,price is -0.38 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
