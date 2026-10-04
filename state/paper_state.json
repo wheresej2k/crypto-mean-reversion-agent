@@ -13,7 +13,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-04T08:45:00+00:00"
+      "checked_through": "2026-10-04T09:00:00+00:00"
     },
     "BTC/USD": {
       "qty": 0.023057721027593164,
@@ -24,7 +24,7 @@
       "target_price": 90774.868752,
       "trade_id": "1ca2dc5e",
       "opened_at": "2026-10-02T18:45:36+00:00",
-      "checked_through": "2026-10-04T08:45:00+00:00"
+      "checked_through": "2026-10-04T09:00:00+00:00"
     },
     "ETH/USD": {
       "qty": 0.7292044745925367,
@@ -35,7 +35,7 @@
       "target_price": 2870.3356506,
       "trade_id": "b9de6d5e",
       "opened_at": "2026-10-02T18:45:36+00:00",
-      "checked_through": "2026-10-04T08:45:00+00:00"
+      "checked_through": "2026-10-04T09:00:00+00:00"
     }
   }
 }
