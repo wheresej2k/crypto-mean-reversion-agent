@@ -1,5 +1,5 @@
 {
-  "cash": 93112.37608565499,
+  "cash": 95085.05595000176,
   "starting_cash": 100000.0,
   "day_start_equity": 96984.95111453751,
   "day_start_date": "2026-10-04",
@@ -13,18 +13,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-04T22:15:00+00:00"
-    },
-    "ETH/USD": {
-      "qty": 0.7292044745925367,
-      "entry_price": 2657.718195,
-      "entry_notional": 1938.02,
-      "entry_fee": 15.504160000000002,
-      "stop_price": 2551.4094671999997,
-      "target_price": 2870.3356506,
-      "trade_id": "b9de6d5e",
-      "opened_at": "2026-10-02T18:45:36+00:00",
-      "checked_through": "2026-10-04T22:15:00+00:00"
+      "checked_through": "2026-10-04T22:30:00+00:00"
     }
   }
 }
