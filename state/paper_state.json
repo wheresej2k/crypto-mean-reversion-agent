@@ -1,8 +1,8 @@
 {
   "cash": 95085.05595000176,
   "starting_cash": 100000.0,
-  "day_start_equity": 96984.95111453751,
-  "day_start_date": "2026-10-04",
+  "day_start_equity": 97047.40398839107,
+  "day_start_date": "2026-10-05",
   "positions": {
     "SOL/USD": {
       "qty": 16.141712909347056,
@@ -13,7 +13,7 @@
       "target_price": 129.92412960000001,
       "trade_id": "a8a083ac",
       "opened_at": "2026-09-28T02:45:31+00:00",
-      "checked_through": "2026-10-04T23:30:00+00:00"
+      "checked_through": "2026-10-04T23:45:00+00:00"
     }
   }
 }
