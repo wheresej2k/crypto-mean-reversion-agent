@@ -77,6 +77,12 @@ class Settings:
     momentum_rebalance_days: int = 14
     momentum_regime_days: int = 150
     momentum_max_names: int | None = None
+    # Trend sleeve (trend_trader.py, trend_strategy.py). Its coins are kept OUT of the
+    # mean-reversion watchlist so the two sleeves never contend for the same symbol.
+    trend_symbols: tuple[str, ...] = ("BTC/USD", "ETH/USD", "SOL/USD")
+    trend_sleeve_pct: float = 0.0
+    trend_lookbacks: tuple[int, ...] = (20, 30, 60, 90, 150, 250, 360)
+    trend_drift_band: float = 0.25
 
 
 def load_params(path: Path = PARAMS_PATH) -> dict:
@@ -123,4 +129,8 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
         momentum_regime_days=int(params.get("momentum_regime_days", 150)),
         momentum_max_names=(int(params["momentum_max_names"])
                             if params.get("momentum_max_names") else None),
+        trend_symbols=tuple(s.strip().upper() for s in params.get("trend_symbols", ["BTC/USD", "ETH/USD", "SOL/USD"])),
+        trend_sleeve_pct=float(params.get("trend_sleeve_pct", 0.0)),
+        trend_lookbacks=tuple(int(n) for n in params.get("trend_lookbacks", [20, 30, 60, 90, 150, 250, 360])),
+        trend_drift_band=float(params.get("trend_drift_band", 0.25)),
     )

@@ -164,6 +164,9 @@ def get_live_prices(symbols):
     return prices
 
 
+STRATEGY_LABELS = {"mean_reversion": "Mean reversion", "trend": "Trend"}
+
+
 def build_positions_table(positions, live_prices):
     if not positions:
         return "<p class=\"muted\">No open positions.</p>"
@@ -172,23 +175,46 @@ def build_positions_table(positions, live_prices):
         current_price = live_prices.get(symbol, pos["entry_price"])
         pl_pct = (current_price - pos["entry_price"]) / pos["entry_price"] * 100
         pl_class = "pos" if pl_pct >= 0 else "neg"
+        sleeve = STRATEGY_LABELS.get(pos.get("strategy", "mean_reversion"), pos.get("strategy"))
+        trend = pos.get("strategy") == "trend"
         rows.append(
             "<tr>"
             f"<td>{esc(symbol)}</td>"
+            f"<td>{esc(sleeve)}</td>"
             f"<td>{pos['qty']:.6f}</td>"
             f"<td>{fmt_money(pos['entry_price'])}</td>"
             f"<td>{fmt_money(current_price)}</td>"
-            f"<td>{fmt_money(pos['stop_price'])}</td>"
-            f"<td>{fmt_money(pos['target_price'])}</td>"
+            f"<td>{'channel stop' if trend else fmt_money(pos['stop_price'])}</td>"
+            f"<td>{'none' if trend else fmt_money(pos['target_price'])}</td>"
             f"<td class=\"{pl_class}\">{fmt_pct(pl_pct)}</td>"
             f"<td>{utc_span(pos.get('opened_at'))}</td>"
             "</tr>"
         )
     return (
-        "<div class=\"table-scroll\"><table><thead><tr><th>Symbol</th><th>Qty</th><th>Entry</th>"
+        "<div class=\"table-scroll\"><table><thead><tr><th>Symbol</th><th>Strategy</th><th>Qty</th><th>Entry</th>"
         f"<th>Current</th><th>Stop</th><th>Target</th><th>Unrealized P/L</th><th>Opened</th></tr></thead>"
         f"<tbody>{''.join(rows)}</tbody></table></div>"
     )
+
+
+def build_trend_section(state, params):
+    targets = (state.get("trend") or {}).get("targets") or {}
+    head = (f"<p class=\"muted\">Breakout trend following (Donchian ensemble, "
+            f"{len(params.get('trend_lookbacks') or [])} channels from {min(params.get('trend_lookbacks') or [0])} to "
+            f"{max(params.get('trend_lookbacks') or [0])} days). Gets {params.get('trend_sleeve_pct')}% of the account; "
+            f"buys a coin when it breaks out above its recent highs, exits on a trailing channel stop, and "
+            f"sits in cash when nothing is trending. Acts once per daily close. Backtest Dec 2021 - Oct 2026: "
+            f"+51% vs -29% holding the three coins.</p>")
+    if not targets:
+        return head + "<p class=\"muted\">No daily decision recorded yet.</p>"
+    rows = "".join(
+        f"<tr><td>{esc(sym)}</td><td>{t.get('channels_long', 0)}/{len(params.get('trend_lookbacks') or [])}</td>"
+        f"<td>{float(t.get('weight', 0)) * 100:.1f}%</td><td>{esc(t.get('reason', ''))}</td></tr>"
+        for sym, t in sorted(targets.items()))
+    last = esc((state.get("trend") or {}).get("last_close_handled", "n/a"))
+    return (head + f"<p class=\"muted\">Latest daily close handled: {last}</p>"
+            "<div class=\"table-scroll\"><table><thead><tr><th>Coin</th><th>Channels long</th>"
+            f"<th>Target (of sleeve)</th><th>Reason</th></tr></thead><tbody>{rows}</tbody></table></div>")
 
 
 def build_log_table(rows):
@@ -243,7 +269,7 @@ def main():
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Crypto Bots - Kraken Mean-Reversion + Alpaca Trend-Following</title>
+<title>Crypto Bots - Kraken Multi-Strategy + Alpaca Trend-Following</title>
 <style>
   :root {{
     color-scheme: light dark;
@@ -306,7 +332,7 @@ def main():
   </p>
 
   <div class="tabs">
-    <button class="tab-btn active" data-tab="kraken">Mean-Reversion (Kraken)</button>
+    <button class="tab-btn active" data-tab="kraken">Multi-Strategy (Kraken)</button>
     <a class="tab-btn" href="{SIBLING_DASHBOARD_URL}" target="_top">Trend-Following (Alpaca)</a>
   </div>
 
@@ -334,30 +360,27 @@ def main():
     </section>
 
     <section>
-      <h2>Live strategy parameters</h2>
+      <h2>Strategy 1 - Trend (BTC/ETH/SOL, daily)</h2>
+      {build_trend_section(state, params)}
+    </section>
+
+    <section>
+      <h2>Strategy 2 - Mean reversion (altcoins, 15-minute)</h2>
       <div class="params">
         <div><span>Rolling window: </span>{params.get('window')} bars (15-min)</div>
-        <div><span>Trend filter window: </span>{params.get('trend_window')} bars (15-min)</div>
         <div><span>Entry z-score: </span>{params.get('entry_zscore')}</div>
         <div><span>Exit z-score: </span>{params.get('exit_zscore')}</div>
         <div><span>Stop-loss: </span>{params.get('stop_loss_pct')}%</div>
         <div><span>Take-profit: </span>{params.get('take_profit_pct')}%</div>
-        <div><span>Max position size: </span>{params.get('max_position_pct')}% of equity</div>
-        <div><span>Max total exposure: </span>{params.get('max_total_exposure_pct')}%</div>
-        <div><span>Trend tolerance: </span>{params.get('trend_tolerance_pct')}%</div>
-        <div><span>Min edge per trade: </span>{max(float(params.get('min_edge_pct') or 0), 2 * float(params.get('trading_fee_pct') or 0) + float(params.get('slippage_pct') or 0)):.2f}%</div>
+        <div><span>Position size: </span>{params.get('max_position_pct')}% of equity</div>
+        <div><span>Max exposure: </span>{params.get('max_total_exposure_pct')}% of equity</div>
         <div><span>Trading fee (per side): </span>{params.get('trading_fee_pct')}%</div>
       </div>
       <p class="muted" style="margin-top:12px;">
-        Buys a coin trading at least {params.get('entry_zscore')} standard deviations below its
-        recent average, provided the bounce on offer at least covers the round trip in fees and
-        slippage (about 1.65%). Tuned for the maximum trade frequency this strategy can produce -
-        roughly 79% of days get a trade, longest gap 5 days - rather than for returns: a full
-        parameter sweep found no profitable setting of
-        this strategy at Kraken's 0.80%-per-side taker fee, so these settings are expected to lose
-        roughly 20% a year. Position size is held to {params.get('max_position_pct')}% of equity so
-        the ledger survives that. The momentum strategy in this repo measures far better but trades
-        only about 7-30 times a year - see docs/momentum_research_2026-09-19.md.
+        Buys an altcoin trading at least {params.get('entry_zscore')} standard deviations below its
+        24-hour average and sells on the bounce. Trades most days, but tested year by year
+        (2021-2026) it lost money in 4 of 6 years, so it runs at half size - it is here for
+        activity, not as the main source of returns.
       </p>
     </section>
 

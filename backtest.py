@@ -123,6 +123,7 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
     trade_pls: list[float] = []
     exit_reasons: dict[str, int] = {}
     equity_curve = []
+    equity_timestamps = []
     day_start_equity = STARTING_CASH
     day_start_date = None
     fee_pct = getattr(settings, "trading_fee_pct", 0.0)
@@ -265,6 +266,7 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
         position_snapshots = snapshot_positions()
         equity = cash + sum(p.market_value for p in position_snapshots.values())
         equity_curve.append(equity)
+        equity_timestamps.append(grid_ts)
 
     final_equity = equity_curve[-1] if equity_curve else STARTING_CASH
     total_return_pct = (final_equity - STARTING_CASH) / STARTING_CASH * 100
@@ -318,6 +320,8 @@ def simulate(settings, bars_by_symbol, mean_std_by_symbol=None, trend_mean_by_sy
         "avg_loss_pct": avg_loss_pct,
         "expectancy_pct": expectancy_pct,
         "exit_reasons": exit_reasons,
+        "equity_curve": equity_curve,
+        "equity_timestamps": equity_timestamps,
     }
 
 

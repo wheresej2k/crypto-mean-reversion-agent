@@ -28,6 +28,15 @@ from models import AccountSnapshot, PositionSnapshot
 STATE_PATH = Path(__file__).parent / "state" / "paper_state.json"
 STARTING_CASH = 100_000.0
 
+# Which sleeve owns a position. Positions written before sleeves existed carry no tag and are
+# mean-reversion positions - that was the only strategy opening them.
+MEAN_REVERSION = "mean_reversion"
+TREND = "trend"
+
+
+def strategy_of(pos: dict) -> str:
+    return pos.get("strategy", MEAN_REVERSION)
+
 
 def _default_state() -> dict:
     today = datetime.now(timezone.utc).date().isoformat()
@@ -126,6 +135,7 @@ class PaperBroker:
         take_profit_pct: float,
         trading_fee_pct: float = 0.0,
         slippage_pct: float = 0.0,
+        strategy: str = MEAN_REVERSION,
     ) -> dict:
         fill_price = self.buy_fill_price(price, slippage_pct)
         qty = notional_usd / fill_price
@@ -143,8 +153,25 @@ class PaperBroker:
             "trade_id": trade_id,
             "opened_at": now,
             "checked_through": now,
+            "strategy": strategy,
         }
         self.state["positions"][symbol] = pos
+        return pos
+
+    def add_to_position(self, symbol: str, notional_usd: float, price: float, trading_fee_pct: float = 0.0, slippage_pct: float = 0.0) -> dict:
+        """Buy more of an open position (the trend sleeve resizes toward a target weight; mean
+        reversion never calls this - it holds one bracket per symbol). Entry price becomes the
+        quantity-weighted average; stop/target levels are left as they are."""
+        pos = self.state["positions"][symbol]
+        fill_price = self.buy_fill_price(price, slippage_pct)
+        qty = notional_usd / fill_price
+        entry_fee = self.fee(notional_usd, trading_fee_pct)
+        self.state["cash"] -= notional_usd + entry_fee
+        total_qty = pos["qty"] + qty
+        pos["entry_price"] = (pos["entry_price"] * pos["qty"] + fill_price * qty) / total_qty
+        pos["qty"] = total_qty
+        pos["entry_notional"] = pos.get("entry_notional", 0.0) + notional_usd
+        pos["entry_fee"] = pos.get("entry_fee", 0.0) + entry_fee
         return pos
 
     def close_position(self, symbol: str, exit_price: float, exit_reason: str, trading_fee_pct: float = 0.0, slippage_pct: float = 0.0) -> dict:

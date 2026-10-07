@@ -14,6 +14,7 @@ Usage:
     python trader.py --dry-run  # do everything except actually touching saved state
 """
 import argparse
+import dataclasses
 import sys
 import traceback
 
@@ -21,7 +22,7 @@ import kraken_client
 from config import load_settings
 from data_validator import validate
 from heartbeat import record_success
-from paper_broker import PaperBroker
+from paper_broker import MEAN_REVERSION, PaperBroker, strategy_of
 from risk_manager import SkippedDecision, evaluate_decisions
 from strategy import generate_signals
 from trade_log import log_close_event, log_row
@@ -35,10 +36,21 @@ def main():
     settings = load_settings()
     broker = PaperBroker()
 
+    # This is the MEAN-REVERSION sleeve. The trend sleeve (trend_trader.py) owns its own
+    # positions; this run must neither trade them nor count them against its own exposure cap.
+    # Mean-reversion positions in coins that have since left the watchlist (the majors moved to
+    # the trend sleeve on 2026-10-07) are still managed here - stops, targets and signal exits -
+    # until they close; decide() never returns BUY for a symbol already held, so no new ones open.
+    mr_held = [s for s, p in broker.state["positions"].items() if strategy_of(p) == MEAN_REVERSION]
+    legacy = [s for s in mr_held if s not in settings.watchlist]
+    other_held = [s for s in broker.state["positions"] if s not in mr_held]
+    settings = dataclasses.replace(settings, watchlist=list(settings.watchlist) + legacy)
+    fetch = list(settings.watchlist) + [s for s in other_held if s not in settings.watchlist]
+
     # --- ACCURATE pillar: fetch, then validate, market data before trusting it ---
-    print(f"Fetching 15-minute bars from Kraken for: {', '.join(settings.watchlist)}")
+    print(f"Fetching 15-minute bars from Kraken for: {', '.join(fetch)}")
     raw_bars = {}
-    for symbol in settings.watchlist:
+    for symbol in fetch:
         try:
             raw_bars[symbol] = kraken_client.get_recent_bars(symbol)
         except Exception as e:
@@ -51,8 +63,7 @@ def main():
         log_row(issue.symbol, "DATA", "skipped", reasoning=issue.reason)
 
     # --- Reconcile: did a stop-loss or take-profit level get crossed since the last run? ---
-    open_symbols = list(broker.state["positions"].keys())
-    for symbol in open_symbols:
+    for symbol in mr_held:
         bars = valid_bars.get(symbol)
         if not bars:
             continue  # this symbol's data didn't pass validation this run - can't safely check it
@@ -77,13 +88,15 @@ def main():
             log_close_event(event)
 
     account = broker.get_account(latest_prices)
-    positions = broker.get_positions(latest_prices)
+    positions = {s: p for s, p in broker.get_positions(latest_prices).items()
+                 if strategy_of(broker.state["positions"][s]) == MEAN_REVERSION}
     print(f"Equity: ${account.equity:.2f}  Cash: ${account.cash:.2f}  Day P/L: {account.day_pl_pct:.2f}%")
     print(f"Open positions: {list(positions.keys()) or 'none'}")
 
     # --- Generate signals, apply risk limits ---
     print("Generating signals (mean reversion, 15-minute bars from Kraken)...")
-    decisions = generate_signals(valid_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore, settings.trend_window, settings.trend_tolerance_pct)
+    signal_bars = {s: b for s, b in valid_bars.items() if s in settings.watchlist}
+    decisions = generate_signals(signal_bars, positions, settings.window, settings.entry_zscore, settings.exit_zscore, settings.trend_window, settings.trend_tolerance_pct)
     decisions_by_symbol = {d.symbol: d for d in decisions}
 
     approved_buys, approved_sells, skipped = evaluate_decisions(
