@@ -22,6 +22,7 @@ import kraken_client
 from config import load_settings
 from data_validator import validate
 from heartbeat import record_success
+from limit_orders import UNFILLED, WAIT, new_order, resolve
 from paper_broker import MEAN_REVERSION, PaperBroker, strategy_of
 from risk_manager import SkippedDecision, evaluate_decisions
 from strategy import generate_signals
@@ -61,6 +62,64 @@ def main():
     for issue in issues:
         print(f"  DATA SKIP {issue.symbol:10s} - {issue.reason}")
         log_row(issue.symbol, "DATA", "skipped", reasoning=issue.reason)
+
+    # --- Limit orders placed last run: did the next bar trade through them? (limit_orders.py) ---
+    # Resolved BEFORE bracket checks, because a fill can be stopped out on its own fill bar - the
+    # same order of operations research_limit.py measured.
+    limit_mode = settings.mr_order_type == "limit"
+    pending = broker.state.setdefault("pending_orders", {})
+    trades_executed = 0
+    for symbol, order in list(pending.items()):
+        bars = valid_bars.get(symbol)
+        if not bars:
+            continue  # no trustworthy data this run - resolve once it returns
+        outcome, bar = resolve(order, bars)
+        if outcome == WAIT:
+            continue
+        pending.pop(symbol)
+        side = "BUY" if order["side"] == "buy" else "SELL"
+        if outcome == UNFILLED:
+            seen = bar.low if side == "BUY" else bar.high
+            why = (f"limit {order['side']} @ ${order['limit']:.6g} not reached by the next bar "
+                   f"({'low' if side == 'BUY' else 'high'} ${seen:.6g}) - cancelled")
+            print(f"  UNFILLED {symbol:10s} {side} - {why}")
+            if not args.dry_run:
+                log_row(symbol, side, "unfilled", reasoning=why)
+            continue
+        if side == "BUY":
+            cost = order["notional"] * (1 + settings.maker_fee_pct / 100)
+            if symbol in broker.state["positions"] or broker.state["cash"] < cost:
+                why = "position already open" if symbol in broker.state["positions"] else "not enough cash at fill time"
+                print(f"  UNFILLED {symbol:10s} BUY - {why}")
+                if not args.dry_run:
+                    log_row(symbol, "BUY", "unfilled", reasoning=why)
+                continue
+            pos = broker.open_position(symbol, order["notional"], order["limit"], settings.stop_loss_pct,
+                                       settings.take_profit_pct, settings.maker_fee_pct, 0.0,
+                                       checked_through=order["placed_after"])
+            print(f"  FILLED {symbol:10s} BUY ${order['notional']} @ ${order['limit']:.6g} (limit, maker fee)")
+            if not args.dry_run:
+                log_row(symbol, "BUY", "executed", amount=order["notional"], confidence=order.get("confidence", ""),
+                        reasoning="[limit fill] " + order.get("reasoning", ""), rolling_mean=order.get("rolling_mean", ""),
+                        zscore=order.get("zscore", ""), trade_id=pos["trade_id"], entry_price=round(pos["entry_price"], 6))
+        else:
+            held = broker.state["positions"].get(symbol)
+            if not held:
+                continue  # already closed by a stop or target - nothing left to sell
+            if order["qty"] >= held["qty"] - 1e-9:
+                event = broker.close_position(symbol, order["limit"], "signal_exit", settings.maker_fee_pct, 0.0)
+                if not args.dry_run:
+                    log_row(symbol, "SELL", "executed", amount=order["qty"], confidence=order.get("confidence", ""),
+                            reasoning="[limit fill] " + order.get("reasoning", ""), exit_price=round(event["exit_price"], 6))
+                    log_close_event(event)
+            else:
+                broker.partial_sell(symbol, order["qty"], order["limit"], settings.maker_fee_pct, 0.0)
+                if not args.dry_run:
+                    log_row(symbol, "SELL", "executed", amount=order["qty"],
+                            reasoning="[limit fill] " + order.get("reasoning", ""))
+            print(f"  FILLED {symbol:10s} SELL @ ${order['limit']:.6g} (limit, maker fee)")
+        trades_executed += 1
+    mr_held = [s for s, p in broker.state["positions"].items() if strategy_of(p) == MEAN_REVERSION]
 
     # --- Reconcile: did a stop-loss or take-profit level get crossed since the last run? ---
     for symbol in mr_held:
@@ -110,6 +169,8 @@ def main():
     for buy in approved_buys:
         if buy.symbol in broker.state["positions"]:
             skipped.append(SkippedDecision(buy.symbol, "BUY", "position already open - not adding to it"))
+        elif buy.symbol in pending:
+            skipped.append(SkippedDecision(buy.symbol, "BUY", "a limit order for this coin is still waiting on its bar"))
         else:
             filtered_buys.append(buy)
     approved_buys = filtered_buys
@@ -124,13 +185,20 @@ def main():
         if not args.dry_run:
             log_row(s.symbol, s.action, "skipped", reasoning=s.reason)
 
-    trades_executed = 0
-
     for sell in approved_sells:
         price = latest_prices[sell.symbol]
+        if limit_mode and sell.symbol not in pending:
+            pending[sell.symbol] = new_order("sell", price, valid_bars[sell.symbol][-1].timestamp, qty=sell.qty,
+                                             confidence=sell.confidence, reasoning=sell.reasoning)
+            print(f"  OFFER {sell.symbol:10s} qty={sell.qty} limit ${price:.6g} - {sell.reasoning}")
+            if not args.dry_run:
+                log_row(sell.symbol, "SELL", "order_placed", amount=sell.qty, confidence=sell.confidence,
+                        reasoning=f"[limit @ ${price:.6g}] {sell.reasoning}")
+            continue
+        if limit_mode:
+            continue  # an offer for this coin is already waiting on its bar
         print(f"  SELL  {sell.symbol:10s} qty={sell.qty} @ ${price:.4f} (confidence {sell.confidence:.0f}) - {sell.reasoning}")
         if args.dry_run:
-            log_row(sell.symbol, "SELL", "dry-run", amount=sell.qty, confidence=sell.confidence, reasoning=sell.reasoning)
             continue
         pos_qty = broker.state["positions"][sell.symbol]["qty"]
         if sell.qty >= pos_qty - 1e-9:
@@ -146,10 +214,19 @@ def main():
     for buy in approved_buys:
         price = latest_prices[buy.symbol]
         d = decisions_by_symbol[buy.symbol]
+        if limit_mode:
+            pending[buy.symbol] = new_order("buy", price, valid_bars[buy.symbol][-1].timestamp,
+                                            notional=buy.notional_usd, confidence=buy.confidence,
+                                            reasoning=buy.reasoning, rolling_mean=round(d.rolling_mean, 6),
+                                            zscore=round(d.zscore, 4))
+            print(f"  BID   {buy.symbol:10s} ${buy.notional_usd} limit ${price:.6g} - {buy.reasoning}")
+            if not args.dry_run:
+                log_row(buy.symbol, "BUY", "order_placed", amount=buy.notional_usd, confidence=buy.confidence,
+                        reasoning=f"[limit @ ${price:.6g}] {buy.reasoning}", rolling_mean=round(d.rolling_mean, 6),
+                        zscore=round(d.zscore, 4))
+            continue
         print(f"  BUY   {buy.symbol:10s} ${buy.notional_usd} @ ${price:.4f} (confidence {buy.confidence:.0f}) - {buy.reasoning}")
         if args.dry_run:
-            log_row(buy.symbol, "BUY", "dry-run", amount=buy.notional_usd, confidence=buy.confidence,
-                    reasoning=buy.reasoning, rolling_mean=round(d.rolling_mean, 6), zscore=round(d.zscore, 4))
             continue
         pos = broker.open_position(
             buy.symbol, buy.notional_usd, price, settings.stop_loss_pct, settings.take_profit_pct,

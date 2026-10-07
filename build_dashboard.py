@@ -217,6 +217,19 @@ def build_trend_section(state, params):
             f"<th>Target (of sleeve)</th><th>Reason</th></tr></thead><tbody>{rows}</tbody></table></div>")
 
 
+def build_pending_table(state):
+    pending = state.get("pending_orders") or {}
+    if not pending:
+        return "<p class=\"muted\">No limit orders waiting right now.</p>"
+    rows = "".join(
+        f"<tr><td>{esc(sym)}</td><td>{esc(o.get('side', '').upper())}</td><td>{fmt_money(o.get('limit', 0))}</td>"
+        f"<td>{fmt_money(o['notional']) if 'notional' in o else esc(o.get('qty', ''))}</td>"
+        f"<td>{utc_span(o.get('placed_after'))}</td></tr>"
+        for sym, o in sorted(pending.items()))
+    return ("<div class=\"table-scroll\"><table><thead><tr><th>Coin</th><th>Side</th><th>Limit</th>"
+            f"<th>Size</th><th>Decision bar</th></tr></thead><tbody>{rows}</tbody></table></div>")
+
+
 def build_log_table(rows):
     if not rows:
         return "<p class=\"muted\">No trade log entries yet.</p>"
@@ -378,10 +391,12 @@ def main():
       </div>
       <p class="muted" style="margin-top:12px;">
         Buys an altcoin trading at least {params.get('entry_zscore')} standard deviations below its
-        24-hour average and sells on the bounce. Trades most days, but tested year by year
-        (2021-2026) it lost money in 4 of 6 years, so it runs at half size - it is here for
-        activity, not as the main source of returns.
+        24-hour average and sells on the bounce, using {'limit orders (0.40% maker fee): an order rests at the decision price and only fills if the next 15-minute bar trades through it. Stop-losses stay instant market orders' if params.get('mr_order_type') == 'limit' else 'market orders'}.
+        Tested year by year 2021-2026 with limit orders it made money in 4 of 6 years
+        (-15/-24/+44/+1/+23/+85%); it still loses in mania and crash years.
       </p>
+      <h2 style="margin-top:16px;">Pending limit orders</h2>
+      {build_pending_table(state)}
     </section>
 
     <section>

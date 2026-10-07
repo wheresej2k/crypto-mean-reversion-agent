@@ -83,6 +83,10 @@ class Settings:
     trend_sleeve_pct: float = 0.0
     trend_lookbacks: tuple[int, ...] = (20, 30, 60, 90, 150, 250, 360)
     trend_drift_band: float = 0.25
+    # Mean-reversion execution: "limit" rests bids/offers at the decision close and fills them on
+    # the next bar at maker_fee_pct (limit_orders.py); "market" fills immediately at the taker fee.
+    mr_order_type: str = "market"
+    maker_fee_pct: float = 0.40
 
 
 def load_params(path: Path = PARAMS_PATH) -> dict:
@@ -133,4 +137,6 @@ def load_settings(params_path: Path = PARAMS_PATH) -> Settings:
         trend_sleeve_pct=float(params.get("trend_sleeve_pct", 0.0)),
         trend_lookbacks=tuple(int(n) for n in params.get("trend_lookbacks", [20, 30, 60, 90, 150, 250, 360])),
         trend_drift_band=float(params.get("trend_drift_band", 0.25)),
+        mr_order_type=str(params.get("mr_order_type", "market")),
+        maker_fee_pct=float(params.get("maker_fee_pct", 0.40)),
     )

@@ -136,7 +136,10 @@ class PaperBroker:
         trading_fee_pct: float = 0.0,
         slippage_pct: float = 0.0,
         strategy: str = MEAN_REVERSION,
+        checked_through: str | None = None,
     ) -> dict:
+        """`checked_through` lets a limit fill start bracket checks from the bar it filled on
+        (the stop can be hit on the fill bar itself), instead of from now."""
         fill_price = self.buy_fill_price(price, slippage_pct)
         qty = notional_usd / fill_price
         entry_fee = self.fee(notional_usd, trading_fee_pct)
@@ -152,7 +155,7 @@ class PaperBroker:
             "target_price": fill_price * (1 + take_profit_pct / 100),
             "trade_id": trade_id,
             "opened_at": now,
-            "checked_through": now,
+            "checked_through": checked_through or now,
             "strategy": strategy,
         }
         self.state["positions"][symbol] = pos

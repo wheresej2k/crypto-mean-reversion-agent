@@ -39,6 +39,8 @@ def load(symbol):
 
 def run_year(args):
     universe_name, symbols, year, overrides = args
+    overrides = dict(overrides)
+    use_limit = bool(overrides.pop("limit", 0))
     settings = dataclasses.replace(load_settings(), **overrides)
     warm = timedelta(minutes=15 * (max(settings.window, settings.trend_window) + 5))
     lo = datetime(year, 1, 1, tzinfo=timezone.utc)
@@ -50,7 +52,11 @@ def run_year(args):
             bars[s] = b
     if not bars:
         return universe_name, year, None
-    r = simulate(settings, bars)
+    if use_limit:
+        from research_limit import simulate_limit
+        r = simulate_limit(settings, bars)
+    else:
+        r = simulate(settings, bars)
     daily = {}
     for ts, eq in zip(r["equity_timestamps"], r["equity_curve"]):
         if ts >= lo:
@@ -60,6 +66,7 @@ def run_year(args):
             "longest_dry_spell_days", "buy_hold_return_pct")
     stats = {k: r[k] for k in keep}
     stats["coins"] = len(bars)
+    stats["bid_fill_rate_pct"] = r.get("bid_fill_rate_pct")
     return universe_name, year, {"stats": stats, "daily": daily}
 
 

@@ -1,5 +1,5 @@
 {
-  "_comment": "2026-10-07 (multi-strategy): TWO SLEEVES share this paper account. (1) TREND - trend_trader.py: Donchian-breakout ensemble (Zarattini et al. 2025, lookbacks 20-360 days, inverse-vol weights) on BTC/ETH/SOL daily bars, trend_sleeve_pct=60% of equity; in cash when nothing trends. Backtest 2021-12..2026-10: +51% vs -29% holding the three, max dd -25%. (2) MEAN REVERSION - trader.py: the 15-minute z-score rules below on the 29 altcoins in WATCHLIST, cut to HALF size (0.5% per position, 10% max) because the per-year test 2021-2026 found it loses in 4 of 6 years (-24/-30/+26/-16/-3/+51%); the trend filter at 6% or 12% did not fix that, so it stays off. Kept for daily activity and data at the user's choice. Combined backtest 2022..2026-10: +32.6% vs -35% holding BTC/ETH/SOL; per year -22/+27/+12/-2/+24%. Not a guarantee of profit every year. See docs/multi_strategy_2026-10-07.md. Momentum params below are unused.",
+  "_comment": "2026-10-07 (multi-strategy): TWO SLEEVES share this paper account. (1) TREND - trend_trader.py: Donchian-breakout ensemble (Zarattini et al. 2025, lookbacks 20-360 days, inverse-vol weights) on BTC/ETH/SOL daily bars, trend_sleeve_pct=60% of equity; in cash when nothing trends. Backtest 2021-12..2026-10: +51% vs -29% holding the three, max dd -25%. (2) MEAN REVERSION - trader.py: the 15-minute z-score rules below on the 29 altcoins in WATCHLIST, cut to HALF size (0.5% per position, 10% max) because the per-year test 2021-2026 found it loses in 4 of 6 years (-24/-30/+26/-16/-3/+51%); the trend filter at 6% or 12% did not fix that, so it stays off. Kept for daily activity and data at the user's choice. Since 2026-10-07 it executes with LIMIT orders (mr_order_type=limit, limit_orders.py): bids/offers rest at the decision close and fill on the next bar only if price trades through them, at the 0.40% maker fee; stops stay market orders. Six-year test: -15/-24/+44/+1/+23/+85% vs -24/-30/+26/-16/-3/+51% with market orders (research_limit.py). Combined backtest 2022..2026-10: +32.6% vs -35% holding BTC/ETH/SOL; per year -22/+27/+12/-2/+24%. Not a guarantee of profit every year. See docs/multi_strategy_2026-10-07.md. Momentum params below are unused.",
   "window": 96,
   "trend_window": 192,
   "entry_zscore": 1.0,
@@ -35,5 +35,7 @@
     250,
     360
   ],
-  "trend_drift_band": 0.25
+  "trend_drift_band": 0.25,
+  "mr_order_type": "limit",
+  "maker_fee_pct": 0.4
 }
