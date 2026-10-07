@@ -18,7 +18,7 @@ env:
   # there's no exchange API key" section.
   # Your choice, not something tune.py/auto_retune.py ever touches. Strategy/risk parameters
   # live in config/params.json instead - see README for why they're kept separate.
-  WATCHLIST: BTC/USD,ETH/USD,SOL/USD,LINK/USD,DOGE/USD
+  WATCHLIST: AAVE/USD,ADA/USD,ARB/USD,AVAX/USD,BAT/USD,BCH/USD,BONK/USD,BTC/USD,CRV/USD,DOGE/USD,DOT/USD,ETH/USD,FIL/USD,GRT/USD,HYPE/USD,LDO/USD,LINK/USD,LTC/USD,ONDO/USD,PEPE/USD,POL/USD,RENDER/USD,SHIB/USD,SKY/USD,SOL/USD,SUSHI/USD,TRUMP/USD,UNI/USD,WIF/USD,XRP/USD,XTZ/USD,YFI/USD
   # Which UTC time gets the once-a-day MMS summary (texting every 15-minute run would be spam).
   # Must be an exact HH:MM this workflow actually runs at (see the cron above) - a mismatch here
   # would mean the daily text silently never fires.
