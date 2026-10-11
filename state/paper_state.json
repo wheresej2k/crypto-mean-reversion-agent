@@ -1,5 +1,5 @@
 {
-  "cash": 63776.477143784025,
+  "cash": 64757.96786894197,
   "starting_cash": 100000.0,
   "day_start_equity": 95044.0164455126,
   "day_start_date": "2026-10-11",
@@ -13,7 +13,7 @@
       "target_price": 188.61906240000002,
       "trade_id": "bc2a6a96",
       "opened_at": "2026-10-07T02:45:42+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00"
+      "checked_through": "2026-10-11T16:15:00+00:00"
     },
     "GRT/USD": {
       "qty": 1490.4259581920753,
@@ -24,7 +24,7 @@
       "target_price": 0.029984985000000002,
       "trade_id": "37365358",
       "opened_at": "2026-10-07T03:00:54+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00"
+      "checked_through": "2026-10-11T16:15:00+00:00"
     },
     "HYPE/USD": {
       "qty": 0.060168372263702766,
@@ -35,7 +35,7 @@
       "target_price": 98.00497800000001,
       "trade_id": "f906d323",
       "opened_at": "2026-10-07T03:15:52+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00"
+      "checked_through": "2026-10-11T16:15:00+00:00"
     },
     "ETH/USD": {
       "qty": 2.8907183298259174,
@@ -61,18 +61,6 @@
       "checked_through": "2026-10-08T00:00:55+00:00",
       "strategy": "trend"
     },
-    "AVAX/USD": {
-      "qty": 45.220970947288734,
-      "entry_price": 10.567,
-      "entry_notional": 477.85,
-      "entry_fee": 1.9114000000000002,
-      "stop_price": 9.5103,
-      "target_price": 11.412360000000001,
-      "trade_id": "4f41dd84",
-      "opened_at": "2026-10-08T13:01:21+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
-      "strategy": "mean_reversion"
-    },
     "LTC/USD": {
       "qty": 0.8936436045603623,
       "entry_price": 64.03,
@@ -82,7 +70,7 @@
       "target_price": 69.1524,
       "trade_id": "a043ce88",
       "opened_at": "2026-10-08T13:01:21+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
+      "checked_through": "2026-10-11T16:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "DOGE/USD": {
@@ -94,7 +82,7 @@
       "target_price": 0.09266508000000001,
       "trade_id": "41adc298",
       "opened_at": "2026-10-08T15:30:49+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
+      "checked_through": "2026-10-11T16:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "BCH/USD": {
@@ -106,7 +94,7 @@
       "target_price": 297.98280000000005,
       "trade_id": "4368ecf7",
       "opened_at": "2026-10-08T17:45:45+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
+      "checked_through": "2026-10-11T16:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "BTC/USD": {
@@ -130,7 +118,7 @@
       "target_price": 0.26869536000000005,
       "trade_id": "0ff8e970",
       "opened_at": "2026-10-11T00:15:38+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
+      "checked_through": "2026-10-11T16:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "FIL/USD": {
@@ -142,19 +130,7 @@
       "target_price": 1.1934,
       "trade_id": "fdfc7186",
       "opened_at": "2026-10-11T03:30:49+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "DOT/USD": {
-      "qty": 386.3832559654695,
-      "entry_price": 1.2279,
-      "entry_notional": 474.44,
-      "entry_fee": 1.8977600000000001,
-      "stop_price": 1.10511,
-      "target_price": 1.326132,
-      "trade_id": "3952c827",
-      "opened_at": "2026-10-11T04:15:35+00:00",
-      "checked_through": "2026-10-11T16:00:00+00:00",
+      "checked_through": "2026-10-11T16:15:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -179,21 +155,13 @@
     }
   },
   "pending_orders": {
-    "AVAX/USD": {
+    "FIL/USD": {
       "side": "sell",
-      "limit": 10.953,
-      "placed_after": "2026-10-11T16:00:00+00:00",
-      "qty": 45.220970947288734,
-      "confidence": 100.0,
-      "reasoning": "price ($10.9530) has reverted to +4.42 standard deviations vs its 96-bar average ($10.4016) - taking the reversion, exiting position"
-    },
-    "DOT/USD": {
-      "side": "sell",
-      "limit": 1.2685,
-      "placed_after": "2026-10-11T16:00:00+00:00",
-      "qty": 386.3832559654695,
-      "confidence": 82.32830151788187,
-      "reasoning": "price ($1.2685) has reverted to +2.06 standard deviations vs its 96-bar average ($1.2445) - taking the reversion, exiting position"
+      "limit": 1.136,
+      "placed_after": "2026-10-11T16:15:00+00:00",
+      "qty": 429.8914027149321,
+      "confidence": 81.63096098885795,
+      "reasoning": "price ($1.1360) has reverted to +2.04 standard deviations vs its 96-bar average ($1.1096) - taking the reversion, exiting position"
     }
   }
 }
