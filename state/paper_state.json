@@ -1,5 +1,5 @@
 {
-  "cash": 64757.96786894197,
+  "cash": 65244.371075892195,
   "starting_cash": 100000.0,
   "day_start_equity": 95044.0164455126,
   "day_start_date": "2026-10-11",
@@ -13,7 +13,7 @@
       "target_price": 188.61906240000002,
       "trade_id": "bc2a6a96",
       "opened_at": "2026-10-07T02:45:42+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00"
+      "checked_through": "2026-10-11T16:30:00+00:00"
     },
     "GRT/USD": {
       "qty": 1490.4259581920753,
@@ -24,7 +24,7 @@
       "target_price": 0.029984985000000002,
       "trade_id": "37365358",
       "opened_at": "2026-10-07T03:00:54+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00"
+      "checked_through": "2026-10-11T16:30:00+00:00"
     },
     "HYPE/USD": {
       "qty": 0.060168372263702766,
@@ -35,7 +35,7 @@
       "target_price": 98.00497800000001,
       "trade_id": "f906d323",
       "opened_at": "2026-10-07T03:15:52+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00"
+      "checked_through": "2026-10-11T16:30:00+00:00"
     },
     "ETH/USD": {
       "qty": 2.8907183298259174,
@@ -70,7 +70,7 @@
       "target_price": 69.1524,
       "trade_id": "a043ce88",
       "opened_at": "2026-10-08T13:01:21+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00",
+      "checked_through": "2026-10-11T16:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "DOGE/USD": {
@@ -82,7 +82,7 @@
       "target_price": 0.09266508000000001,
       "trade_id": "41adc298",
       "opened_at": "2026-10-08T15:30:49+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00",
+      "checked_through": "2026-10-11T16:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BCH/USD": {
@@ -94,7 +94,7 @@
       "target_price": 297.98280000000005,
       "trade_id": "4368ecf7",
       "opened_at": "2026-10-08T17:45:45+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00",
+      "checked_through": "2026-10-11T16:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BTC/USD": {
@@ -118,19 +118,7 @@
       "target_price": 0.26869536000000005,
       "trade_id": "0ff8e970",
       "opened_at": "2026-10-11T00:15:38+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "FIL/USD": {
-      "qty": 429.8914027149321,
-      "entry_price": 1.105,
-      "entry_notional": 475.03,
-      "entry_fee": 1.90012,
-      "stop_price": 0.9945,
-      "target_price": 1.1934,
-      "trade_id": "fdfc7186",
-      "opened_at": "2026-10-11T03:30:49+00:00",
-      "checked_through": "2026-10-11T16:15:00+00:00",
+      "checked_through": "2026-10-11T16:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -155,13 +143,13 @@
     }
   },
   "pending_orders": {
-    "FIL/USD": {
+    "BCH/USD": {
       "side": "sell",
-      "limit": 1.136,
-      "placed_after": "2026-10-11T16:15:00+00:00",
-      "qty": 429.8914027149321,
-      "confidence": 81.63096098885795,
-      "reasoning": "price ($1.1360) has reverted to +2.04 standard deviations vs its 96-bar average ($1.1096) - taking the reversion, exiting position"
+      "limit": 283.39,
+      "placed_after": "2026-10-11T16:30:00+00:00",
+      "qty": 1.7014243775144067,
+      "confidence": 100.0,
+      "reasoning": "price ($283.3900) has reverted to +2.77 standard deviations vs its 96-bar average ($278.8504) - taking the reversion, exiting position"
     }
   }
 }
