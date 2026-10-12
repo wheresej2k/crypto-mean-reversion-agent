@@ -13,7 +13,7 @@
       "target_price": 188.61906240000002,
       "trade_id": "bc2a6a96",
       "opened_at": "2026-10-07T02:45:42+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00"
+      "checked_through": "2026-10-12T00:00:00+00:00"
     },
     "GRT/USD": {
       "qty": 1490.4259581920753,
@@ -24,7 +24,7 @@
       "target_price": 0.029984985000000002,
       "trade_id": "37365358",
       "opened_at": "2026-10-07T03:00:54+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00"
+      "checked_through": "2026-10-12T00:00:00+00:00"
     },
     "HYPE/USD": {
       "qty": 0.060168372263702766,
@@ -35,7 +35,7 @@
       "target_price": 98.00497800000001,
       "trade_id": "f906d323",
       "opened_at": "2026-10-07T03:15:52+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00"
+      "checked_through": "2026-10-12T00:00:00+00:00"
     },
     "ETH/USD": {
       "qty": 2.8907183298259174,
@@ -70,7 +70,7 @@
       "target_price": 69.1524,
       "trade_id": "a043ce88",
       "opened_at": "2026-10-08T13:01:21+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00",
+      "checked_through": "2026-10-12T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "DOGE/USD": {
@@ -82,7 +82,7 @@
       "target_price": 0.09266508000000001,
       "trade_id": "41adc298",
       "opened_at": "2026-10-08T15:30:49+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00",
+      "checked_through": "2026-10-12T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "BTC/USD": {
@@ -106,7 +106,7 @@
       "target_price": 0.26869536000000005,
       "trade_id": "0ff8e970",
       "opened_at": "2026-10-11T00:15:38+00:00",
-      "checked_through": "2026-10-11T23:45:00+00:00",
+      "checked_through": "2026-10-12T00:00:00+00:00",
       "strategy": "mean_reversion"
     }
   },
