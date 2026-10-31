@@ -1,5 +1,5 @@
 {
-  "cash": 77544.2196165335,
+  "cash": 78013.24706569444,
   "starting_cash": 100000.0,
   "day_start_equity": 91604.35168752985,
   "day_start_date": "2026-10-31",
@@ -49,7 +49,7 @@
       "target_price": 312.98400000000004,
       "trade_id": "0a8d779c",
       "opened_at": "2026-10-28T16:45:50+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -61,7 +61,7 @@
       "target_price": 136.38240000000002,
       "trade_id": "d349d300",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -73,19 +73,7 @@
       "target_price": 0.1403136,
       "trade_id": "b6f13cb5",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "BONK/USD": {
-      "qty": 157706327.3727648,
-      "entry_price": 2.908e-06,
-      "entry_notional": 458.61,
-      "entry_fee": 1.83444,
-      "stop_price": 2.6172e-06,
-      "target_price": 3.1406400000000003e-06,
-      "trade_id": "51e78111",
-      "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -97,7 +85,7 @@
       "target_price": 59.7996,
       "trade_id": "e8f029c6",
       "opened_at": "2026-10-29T22:30:39+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -109,7 +97,7 @@
       "target_price": 1.6804800000000002,
       "trade_id": "22d4a7a7",
       "opened_at": "2026-10-30T00:15:37+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "XTZ/USD": {
@@ -121,7 +109,7 @@
       "target_price": 0.276426,
       "trade_id": "63052de5",
       "opened_at": "2026-10-30T05:30:44+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "XRP/USD": {
@@ -133,7 +121,7 @@
       "target_price": 1.3265532000000002,
       "trade_id": "f3a5ae69",
       "opened_at": "2026-10-30T14:30:47+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -145,7 +133,7 @@
       "target_price": 97.0164,
       "trade_id": "0ea49123",
       "opened_at": "2026-10-30T18:45:44+00:00",
-      "checked_through": "2026-10-30T23:45:00+00:00",
+      "checked_through": "2026-10-31T00:00:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -170,13 +158,13 @@
     }
   },
   "pending_orders": {
-    "BONK/USD": {
+    "AAVE/USD": {
       "side": "sell",
-      "limit": 2.986e-06,
-      "placed_after": "2026-10-30T23:45:00+00:00",
-      "qty": 157706327.3727648,
-      "confidence": 45.11998642516616,
-      "reasoning": "price ($0.0000) has reverted to +1.13 standard deviations vs its 96-bar average ($0.0000) - taking the reversion, exiting position"
+      "limit": 129.99,
+      "placed_after": "2026-10-31T00:00:00+00:00",
+      "qty": 3.631691479252455,
+      "confidence": 77.56320911495031,
+      "reasoning": "price ($129.9900) has reverted to +1.94 standard deviations vs its 96-bar average ($125.0935) - taking the reversion, exiting position"
     }
   }
 }
