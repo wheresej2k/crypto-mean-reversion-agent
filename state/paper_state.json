@@ -1,8 +1,8 @@
 {
   "cash": 77544.2196165335,
   "starting_cash": 100000.0,
-  "day_start_equity": 91364.32759986496,
-  "day_start_date": "2026-10-30",
+  "day_start_equity": 91604.35168752985,
+  "day_start_date": "2026-10-31",
   "positions": {
     "ETH/USD": {
       "qty": 1.0648704899035208,
@@ -49,7 +49,7 @@
       "target_price": 312.98400000000004,
       "trade_id": "0a8d779c",
       "opened_at": "2026-10-28T16:45:50+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -61,7 +61,7 @@
       "target_price": 136.38240000000002,
       "trade_id": "d349d300",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -73,7 +73,7 @@
       "target_price": 0.1403136,
       "trade_id": "b6f13cb5",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "BONK/USD": {
@@ -85,7 +85,7 @@
       "target_price": 3.1406400000000003e-06,
       "trade_id": "51e78111",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -97,7 +97,7 @@
       "target_price": 59.7996,
       "trade_id": "e8f029c6",
       "opened_at": "2026-10-29T22:30:39+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -109,7 +109,7 @@
       "target_price": 1.6804800000000002,
       "trade_id": "22d4a7a7",
       "opened_at": "2026-10-30T00:15:37+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "XTZ/USD": {
@@ -121,7 +121,7 @@
       "target_price": 0.276426,
       "trade_id": "63052de5",
       "opened_at": "2026-10-30T05:30:44+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "XRP/USD": {
@@ -133,7 +133,7 @@
       "target_price": 1.3265532000000002,
       "trade_id": "f3a5ae69",
       "opened_at": "2026-10-30T14:30:47+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -145,20 +145,20 @@
       "target_price": 97.0164,
       "trade_id": "0ea49123",
       "opened_at": "2026-10-30T18:45:44+00:00",
-      "checked_through": "2026-10-30T23:30:00+00:00",
+      "checked_through": "2026-10-30T23:45:00+00:00",
       "strategy": "mean_reversion"
     }
   },
   "trend": {
-    "last_close_handled": "2026-10-29",
+    "last_close_handled": "2026-10-30",
     "targets": {
       "BTC/USD": {
-        "weight": 0.1186,
+        "weight": 0.1185,
         "channels_long": 2,
-        "reason": "2 of 7 breakout channels long - trend up, target 11.9% of sleeve"
+        "reason": "2 of 7 breakout channels long - trend up, target 11.8% of sleeve"
       },
       "ETH/USD": {
-        "weight": 0.0437,
+        "weight": 0.0438,
         "channels_long": 1,
         "reason": "1 of 7 breakout channels long - trend up, target 4.4% of sleeve"
       },
@@ -172,19 +172,11 @@
   "pending_orders": {
     "BONK/USD": {
       "side": "sell",
-      "limit": 2.995e-06,
-      "placed_after": "2026-10-30T23:30:00+00:00",
+      "limit": 2.986e-06,
+      "placed_after": "2026-10-30T23:45:00+00:00",
       "qty": 157706327.3727648,
-      "confidence": 51.11820219037901,
-      "reasoning": "price ($0.0000) has reverted to +1.28 standard deviations vs its 96-bar average ($0.0000) - taking the reversion, exiting position"
-    },
-    "TRUMP/USD": {
-      "side": "sell",
-      "limit": 1.608,
-      "placed_after": "2026-10-30T23:30:00+00:00",
-      "qty": 22.3586118251928,
-      "confidence": 97.18303479400663,
-      "reasoning": "price ($1.6080) has reverted to +2.43 standard deviations vs its 96-bar average ($1.5527) - taking the reversion, exiting position"
+      "confidence": 45.11998642516616,
+      "reasoning": "price ($0.0000) has reverted to +1.13 standard deviations vs its 96-bar average ($0.0000) - taking the reversion, exiting position"
     }
   }
 }
