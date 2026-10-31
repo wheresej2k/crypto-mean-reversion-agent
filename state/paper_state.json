@@ -49,7 +49,7 @@
       "target_price": 312.98400000000004,
       "trade_id": "0a8d779c",
       "opened_at": "2026-10-28T16:45:50+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -61,7 +61,7 @@
       "target_price": 0.1403136,
       "trade_id": "b6f13cb5",
       "opened_at": "2026-10-29T21:00:51+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -73,7 +73,7 @@
       "target_price": 59.7996,
       "trade_id": "e8f029c6",
       "opened_at": "2026-10-29T22:30:39+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "XTZ/USD": {
@@ -85,7 +85,7 @@
       "target_price": 0.276426,
       "trade_id": "63052de5",
       "opened_at": "2026-10-30T05:30:44+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "XRP/USD": {
@@ -97,7 +97,7 @@
       "target_price": 1.3265532000000002,
       "trade_id": "f3a5ae69",
       "opened_at": "2026-10-30T14:30:47+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -109,7 +109,7 @@
       "target_price": 97.0164,
       "trade_id": "0ea49123",
       "opened_at": "2026-10-30T18:45:44+00:00",
-      "checked_through": "2026-10-31T09:15:00+00:00",
+      "checked_through": "2026-10-31T09:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
