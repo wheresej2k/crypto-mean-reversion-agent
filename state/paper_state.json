@@ -1,5 +1,5 @@
 {
-  "cash": 77307.17996606849,
+  "cash": 79400.36100797105,
   "starting_cash": 100000.0,
   "day_start_equity": 91337.64107244952,
   "day_start_date": "2026-11-04",
@@ -37,7 +37,7 @@
       "target_price": 312.98400000000004,
       "trade_id": "0a8d779c",
       "opened_at": "2026-10-28T16:45:50+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -49,7 +49,7 @@
       "target_price": 59.7996,
       "trade_id": "e8f029c6",
       "opened_at": "2026-10-29T22:30:39+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "XTZ/USD": {
@@ -61,7 +61,7 @@
       "target_price": 0.276426,
       "trade_id": "63052de5",
       "opened_at": "2026-10-30T05:30:44+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -73,19 +73,7 @@
       "target_price": 97.0164,
       "trade_id": "0ea49123",
       "opened_at": "2026-10-30T18:45:44+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "BAT/USD": {
-      "qty": 3341.0632246773134,
-      "entry_price": 0.13713,
-      "entry_notional": 458.16,
-      "entry_fee": 1.83264,
-      "stop_price": 0.123417,
-      "target_price": 0.14810040000000002,
-      "trade_id": "e183c93c",
-      "opened_at": "2026-11-01T16:30:48+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "CRV/USD": {
@@ -97,19 +85,7 @@
       "target_price": 0.30041280000000004,
       "trade_id": "033c727c",
       "opened_at": "2026-11-01T18:00:51+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "ONDO/USD": {
-      "qty": 1138.3594662425764,
-      "entry_price": 0.40243,
-      "entry_notional": 458.11,
-      "entry_fee": 1.8324400000000003,
-      "stop_price": 0.36218700000000004,
-      "target_price": 0.4346244,
-      "trade_id": "a77087ca",
-      "opened_at": "2026-11-01T19:00:48+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -121,19 +97,7 @@
       "target_price": 144.4824,
       "trade_id": "324361fc",
       "opened_at": "2026-11-01T19:15:41+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "GRT/USD": {
-      "qty": 22898.0,
-      "entry_price": 0.02,
-      "entry_notional": 457.96,
-      "entry_fee": 1.83184,
-      "stop_price": 0.018000000000000002,
-      "target_price": 0.0216,
-      "trade_id": "45635091",
-      "opened_at": "2026-11-01T19:15:41+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LINK/USD": {
@@ -145,19 +109,7 @@
       "target_price": 12.3594228,
       "trade_id": "6f4325b4",
       "opened_at": "2026-11-01T19:15:41+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "RENDER/USD": {
-      "qty": 295.3741935483871,
-      "entry_price": 1.55,
-      "entry_notional": 457.83,
-      "entry_fee": 1.83132,
-      "stop_price": 1.395,
-      "target_price": 1.6740000000000002,
-      "trade_id": "b8be2db0",
-      "opened_at": "2026-11-02T06:45:51+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "SKY/USD": {
@@ -169,19 +121,7 @@
       "target_price": 0.0720036,
       "trade_id": "1222e7dd",
       "opened_at": "2026-11-02T06:45:51+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "WIF/USD": {
-      "qty": 1179.735175590098,
-      "entry_price": 0.1737,
-      "entry_notional": 204.92,
-      "entry_fee": 0.8196800000000001,
-      "stop_price": 0.15633,
-      "target_price": 0.187596,
-      "trade_id": "7b4c3404",
-      "opened_at": "2026-11-02T06:45:51+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -193,7 +133,7 @@
       "target_price": 1.6081200000000002,
       "trade_id": "8d66009c",
       "opened_at": "2026-11-04T10:16:00+00:00",
-      "checked_through": "2026-11-04T15:15:00+00:00",
+      "checked_through": "2026-11-04T15:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -217,46 +157,5 @@
       }
     }
   },
-  "pending_orders": {
-    "BAT/USD": {
-      "side": "sell",
-      "limit": 0.14089,
-      "placed_after": "2026-11-04T15:15:00+00:00",
-      "qty": 3341.0632246773134,
-      "confidence": 78.40058233794608,
-      "reasoning": "price ($0.1409) has reverted to +1.96 standard deviations vs its 96-bar average ($0.1310) - taking the reversion, exiting position"
-    },
-    "GRT/USD": {
-      "side": "sell",
-      "limit": 0.02081,
-      "placed_after": "2026-11-04T15:15:00+00:00",
-      "qty": 22898.0,
-      "confidence": 100.0,
-      "reasoning": "price ($0.0208) has reverted to +2.95 standard deviations vs its 96-bar average ($0.0198) - taking the reversion, exiting position"
-    },
-    "ONDO/USD": {
-      "side": "sell",
-      "limit": 0.41448,
-      "placed_after": "2026-11-04T15:15:00+00:00",
-      "qty": 1138.3594662425764,
-      "confidence": 100.0,
-      "reasoning": "price ($0.4145) has reverted to +2.56 standard deviations vs its 96-bar average ($0.3934) - taking the reversion, exiting position"
-    },
-    "RENDER/USD": {
-      "side": "sell",
-      "limit": 1.595,
-      "placed_after": "2026-11-04T15:15:00+00:00",
-      "qty": 295.3741935483871,
-      "confidence": 100.0,
-      "reasoning": "price ($1.5950) has reverted to +2.78 standard deviations vs its 96-bar average ($1.5122) - taking the reversion, exiting position"
-    },
-    "WIF/USD": {
-      "side": "sell",
-      "limit": 0.1792,
-      "placed_after": "2026-11-04T15:15:00+00:00",
-      "qty": 1179.735175590098,
-      "confidence": 88.24250580234613,
-      "reasoning": "price ($0.1792) has reverted to +2.21 standard deviations vs its 96-bar average ($0.1731) - taking the reversion, exiting position"
-    }
-  }
+  "pending_orders": {}
 }
