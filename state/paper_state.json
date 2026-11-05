@@ -37,7 +37,7 @@
       "target_price": 312.98400000000004,
       "trade_id": "0a8d779c",
       "opened_at": "2026-10-28T16:45:50+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -49,7 +49,7 @@
       "target_price": 59.7996,
       "trade_id": "e8f029c6",
       "opened_at": "2026-10-29T22:30:39+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -61,7 +61,7 @@
       "target_price": 97.0164,
       "trade_id": "0ea49123",
       "opened_at": "2026-10-30T18:45:44+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "CRV/USD": {
@@ -73,7 +73,7 @@
       "target_price": 0.30041280000000004,
       "trade_id": "033c727c",
       "opened_at": "2026-11-01T18:00:51+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -85,7 +85,7 @@
       "target_price": 144.4824,
       "trade_id": "324361fc",
       "opened_at": "2026-11-01T19:15:41+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "LINK/USD": {
@@ -97,7 +97,7 @@
       "target_price": 12.3594228,
       "trade_id": "6f4325b4",
       "opened_at": "2026-11-01T19:15:41+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "SKY/USD": {
@@ -109,7 +109,7 @@
       "target_price": 0.0720036,
       "trade_id": "1222e7dd",
       "opened_at": "2026-11-02T06:45:51+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -121,7 +121,7 @@
       "target_price": 1.42668,
       "trade_id": "faaf4734",
       "opened_at": "2026-11-04T17:45:42+00:00",
-      "checked_through": "2026-11-05T04:30:00+00:00",
+      "checked_through": "2026-11-05T04:45:00+00:00",
       "strategy": "mean_reversion"
     }
   },
