@@ -1,6 +1,7 @@
 {
-  "timestamp_utc": "2026-11-09T20:45:40+00:00",
-  "equity": 90492.9663418133,
+  "timestamp_utc": "2026-11-09T21:26:16+00:00",
+  "equity": 90904.7062563216,
   "trades_executed": 0,
-  "run_count": 5529
+  "note": "no valid data this run",
+  "run_count": 5530
 }
