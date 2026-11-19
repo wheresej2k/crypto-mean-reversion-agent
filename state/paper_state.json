@@ -73,7 +73,7 @@
       "target_price": 0.16722504000000002,
       "trade_id": "c1a11252",
       "opened_at": "2026-11-14T16:30:57+00:00",
-      "checked_through": "2026-11-19T01:30:00+00:00",
+      "checked_through": "2026-11-19T01:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -169,7 +169,7 @@
       "target_price": 0.142992,
       "trade_id": "3ff7dd02",
       "opened_at": "2026-11-16T08:30:51+00:00",
-      "checked_through": "2026-11-19T01:30:00+00:00",
+      "checked_through": "2026-11-19T01:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "XTZ/USD": {
@@ -217,7 +217,7 @@
       "target_price": 118.11960000000002,
       "trade_id": "2c4708c8",
       "opened_at": "2026-11-18T14:45:48+00:00",
-      "checked_through": "2026-11-19T01:30:00+00:00",
+      "checked_through": "2026-11-19T01:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "AVAX/USD": {
@@ -229,7 +229,7 @@
       "target_price": 7.585920000000001,
       "trade_id": "e8e88f33",
       "opened_at": "2026-11-18T15:00:43+00:00",
-      "checked_through": "2026-11-19T01:30:00+00:00",
+      "checked_through": "2026-11-19T01:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -301,7 +301,7 @@
       "target_price": 0.06285729600000001,
       "trade_id": "9904a8c3",
       "opened_at": "2026-11-18T16:45:39+00:00",
-      "checked_through": "2026-11-19T01:30:00+00:00",
+      "checked_through": "2026-11-19T01:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "GRT/USD": {
