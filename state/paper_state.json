@@ -1,81 +1,9 @@
 {
-  "cash": 78843.64163901028,
+  "cash": 81214.94640150627,
   "starting_cash": 100000.0,
   "day_start_equity": 87787.24333258774,
   "day_start_date": "2026-11-21",
   "positions": {
-    "XTZ/USD": {
-      "qty": 2117.986916869598,
-      "entry_price": 0.20943,
-      "entry_notional": 443.57,
-      "entry_fee": 1.77428,
-      "stop_price": 0.18848700000000002,
-      "target_price": 0.2261844,
-      "trade_id": "4cd02b21",
-      "opened_at": "2026-11-17T15:30:42+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "AVAX/USD": {
-      "qty": 63.11361047835991,
-      "entry_price": 7.024,
-      "entry_notional": 443.31,
-      "entry_fee": 1.7732400000000001,
-      "stop_price": 6.3216,
-      "target_price": 7.585920000000001,
-      "trade_id": "e8e88f33",
-      "opened_at": "2026-11-18T15:00:43+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "DOT/USD": {
-      "qty": 618.7430167597765,
-      "entry_price": 0.716,
-      "entry_notional": 443.02,
-      "entry_fee": 1.7720799999999999,
-      "stop_price": 0.6444,
-      "target_price": 0.77328,
-      "trade_id": "566cc2d2",
-      "opened_at": "2026-11-18T16:00:44+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "ONDO/USD": {
-      "qty": 1474.8160724391623,
-      "entry_price": 0.30039,
-      "entry_notional": 443.02,
-      "entry_fee": 1.7720799999999999,
-      "stop_price": 0.270351,
-      "target_price": 0.3244212,
-      "trade_id": "8dd2e7d4",
-      "opened_at": "2026-11-18T16:00:44+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "DOGE/USD": {
-      "qty": 7606.887830491468,
-      "entry_price": 0.0582012,
-      "entry_notional": 442.73,
-      "entry_fee": 1.77092,
-      "stop_price": 0.052381080000000003,
-      "target_price": 0.06285729600000001,
-      "trade_id": "9904a8c3",
-      "opened_at": "2026-11-18T16:45:39+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "GRT/USD": {
-      "qty": 26167.65402843602,
-      "entry_price": 0.01688,
-      "entry_notional": 441.71,
-      "entry_fee": 1.76684,
-      "stop_price": 0.015191999999999999,
-      "target_price": 0.0182304,
-      "trade_id": "7b2ebc0c",
-      "opened_at": "2026-11-19T17:30:43+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
-      "strategy": "mean_reversion"
-    },
     "POL/USD": {
       "qty": 5194.152923538231,
       "entry_price": 0.08004,
@@ -85,7 +13,7 @@
       "target_price": 0.08644320000000001,
       "trade_id": "550bfaba",
       "opened_at": "2026-11-19T21:30:43+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "XRP/USD": {
@@ -97,7 +25,7 @@
       "target_price": 1.0309788,
       "trade_id": "f44bd49b",
       "opened_at": "2026-11-19T21:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "ARB/USD": {
@@ -109,7 +37,7 @@
       "target_price": 0.127872,
       "trade_id": "012de793",
       "opened_at": "2026-11-20T02:15:56+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "FIL/USD": {
@@ -121,7 +49,7 @@
       "target_price": 0.5961600000000001,
       "trade_id": "8c294c9c",
       "opened_at": "2026-11-20T05:00:42+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -133,7 +61,7 @@
       "target_price": 0.09284760000000002,
       "trade_id": "66352133",
       "opened_at": "2026-11-20T12:45:33+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -145,7 +73,7 @@
       "target_price": 0.9547200000000001,
       "trade_id": "8ba7cea7",
       "opened_at": "2026-11-20T13:30:51+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "CRV/USD": {
@@ -157,7 +85,7 @@
       "target_price": 0.20107440000000001,
       "trade_id": "eb11dcea",
       "opened_at": "2026-11-20T14:00:42+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "SHIB/USD": {
@@ -169,7 +97,7 @@
       "target_price": 3.898800000000001e-06,
       "trade_id": "9b761cb2",
       "opened_at": "2026-11-20T15:30:40+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "UNI/USD": {
@@ -181,7 +109,7 @@
       "target_price": 4.969944,
       "trade_id": "e7ca91ca",
       "opened_at": "2026-11-20T15:30:40+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -193,7 +121,7 @@
       "target_price": 106.4556,
       "trade_id": "bfe1183f",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BCH/USD": {
@@ -205,7 +133,7 @@
       "target_price": 209.25,
       "trade_id": "2ffae00e",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "BONK/USD": {
@@ -217,7 +145,7 @@
       "target_price": 2.25612e-06,
       "trade_id": "824781f3",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LDO/USD": {
@@ -229,7 +157,7 @@
       "target_price": 0.26244,
       "trade_id": "582848c2",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LINK/USD": {
@@ -241,7 +169,7 @@
       "target_price": 9.166446000000002,
       "trade_id": "1067a018",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -253,7 +181,7 @@
       "target_price": 43.675200000000004,
       "trade_id": "cd8090d8",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "PEPE/USD": {
@@ -265,7 +193,7 @@
       "target_price": 3.66336e-06,
       "trade_id": "1c3f110c",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "WIF/USD": {
@@ -277,7 +205,7 @@
       "target_price": 0.129276,
       "trade_id": "6f639c7c",
       "opened_at": "2026-11-20T16:00:41+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "ADA/USD": {
@@ -289,7 +217,7 @@
       "target_price": 0.15099372,
       "trade_id": "f46efcdd",
       "opened_at": "2026-11-20T16:15:49+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "RENDER/USD": {
@@ -301,7 +229,7 @@
       "target_price": 1.35216,
       "trade_id": "b570e2c6",
       "opened_at": "2026-11-20T16:15:49+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "YFI/USD": {
@@ -313,7 +241,7 @@
       "target_price": 1716.228,
       "trade_id": "26e0d703",
       "opened_at": "2026-11-20T17:30:42+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "HYPE/USD": {
@@ -325,7 +253,7 @@
       "target_price": 65.3508,
       "trade_id": "11ccd6ed",
       "opened_at": "2026-11-20T19:45:39+00:00",
-      "checked_through": "2026-11-21T03:15:00+00:00",
+      "checked_through": "2026-11-21T03:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -349,5 +277,66 @@
       }
     }
   },
-  "pending_orders": {}
+  "pending_orders": {
+    "AVAX/USD": {
+      "side": "buy",
+      "limit": 6.165,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 436.78,
+      "confidence": 100.0,
+      "reasoning": "price ($6.1650) is 2.62 standard deviations below its 96-bar average ($6.6686) - likely oversold, buying the dip",
+      "rolling_mean": 6.668646,
+      "zscore": -2.6179
+    },
+    "DOGE/USD": {
+      "side": "buy",
+      "limit": 0.0518904,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 436.78,
+      "confidence": 83.6658680319037,
+      "reasoning": "price ($0.0519) is 2.09 standard deviations below its 96-bar average ($0.0553) - likely oversold, buying the dip",
+      "rolling_mean": 0.055344,
+      "zscore": -2.0916
+    },
+    "DOT/USD": {
+      "side": "buy",
+      "limit": 0.6296,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 436.78,
+      "confidence": 100.0,
+      "reasoning": "price ($0.6296) is 2.59 standard deviations below its 96-bar average ($0.6787) - likely oversold, buying the dip",
+      "rolling_mean": 0.678706,
+      "zscore": -2.5931
+    },
+    "GRT/USD": {
+      "side": "buy",
+      "limit": 0.0151,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 436.78,
+      "confidence": 100.0,
+      "reasoning": "price ($0.0151) is 2.63 standard deviations below its 96-bar average ($0.0161) - likely oversold, buying the dip",
+      "rolling_mean": 0.016099,
+      "zscore": -2.6259
+    },
+    "ONDO/USD": {
+      "side": "buy",
+      "limit": 0.26291,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 436.78,
+      "confidence": 100.0,
+      "reasoning": "price ($0.2629) is 2.98 standard deviations below its 96-bar average ($0.2843) - likely oversold, buying the dip",
+      "rolling_mean": 0.284328,
+      "zscore": -2.9751
+    },
+    "SUSHI/USD": {
+      "side": "buy",
+      "limit": 0.142,
+      "placed_after": "2026-11-21T03:30:00+00:00",
+      "notional": 410.32,
+      "confidence": 70.0540491231531,
+      "reasoning": "price ($0.1420) is 1.75 standard deviations below its 96-bar average ($0.1475) - likely oversold, buying the dip",
+      "rolling_mean": 0.147527,
+      "zscore": -1.7514
+    }
+  }
 }

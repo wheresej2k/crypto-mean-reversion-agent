@@ -142899,3 +142899,38 @@ timestamp_utc,symbol,action,status,amount,confidence,reasoning,rolling_mean,zsco
 2026-11-21T03:44:17+00:00,XRP/USD,HOLD,skipped,,,price is -1.35 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
 2026-11-21T03:44:17+00:00,XTZ/USD,HOLD,skipped,,,price is -1.14 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
 2026-11-21T03:44:17+00:00,YFI/USD,HOLD,skipped,,,price is -0.82 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,XTZ/USD,CLOSE,executed,,,,,,,4cd02b21,stop_loss,0.20943,0.188393,-11.12
+2026-11-21T03:45:55+00:00,AVAX/USD,CLOSE,executed,,,,,,,e8e88f33,stop_loss,7.024,6.318439,-11.12
+2026-11-21T03:45:55+00:00,DOT/USD,CLOSE,executed,,,,,,,566cc2d2,stop_loss,0.716,0.644078,-11.12
+2026-11-21T03:45:55+00:00,ONDO/USD,CLOSE,executed,,,,,,,8dd2e7d4,stop_loss,0.30039,0.270216,-11.12
+2026-11-21T03:45:55+00:00,DOGE/USD,CLOSE,executed,,,,,,,9904a8c3,stop_loss,0.058201,0.052355,-11.12
+2026-11-21T03:45:55+00:00,GRT/USD,CLOSE,executed,,,,,,,7b2ebc0c,stop_loss,0.01688,0.015184,-11.12
+2026-11-21T03:45:55+00:00,AAVE/USD,HOLD,skipped,,,price is -2.25 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,ADA/USD,HOLD,skipped,,,price is -2.25 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,ARB/USD,HOLD,skipped,,,price is -2.57 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,BAT/USD,HOLD,skipped,,,price is -1.96 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,BCH/USD,HOLD,skipped,,,price is -2.19 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,BONK/USD,HOLD,skipped,,,price is -2.09 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,CRV/USD,HOLD,skipped,,,price is -1.99 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,FIL/USD,HOLD,skipped,,,price is -2.44 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,HYPE/USD,HOLD,skipped,,,price is -2.54 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,LDO/USD,HOLD,skipped,,,price is -2.28 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,LINK/USD,HOLD,skipped,,,price is -2.24 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,LTC/USD,HOLD,skipped,,,price is -3.07 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,PEPE/USD,HOLD,skipped,,,price is -2.75 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,POL/USD,HOLD,skipped,,,price is -2.26 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,RENDER/USD,HOLD,skipped,,,price is -2.03 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,SHIB/USD,HOLD,skipped,,,price is -2.13 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,SKY/USD,HOLD,skipped,,,price is -0.34 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,TRUMP/USD,HOLD,skipped,,,price is -1.60 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,UNI/USD,HOLD,skipped,,,price is -1.81 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,WIF/USD,HOLD,skipped,,,price is -2.29 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,XRP/USD,HOLD,skipped,,,price is -1.87 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,XTZ/USD,BUY,skipped,,,portfolio exposure limit (10.0%) reached,,,,,,,,
+2026-11-21T03:45:55+00:00,YFI/USD,HOLD,skipped,,,price is -2.12 standard deviations from its 96-bar average - no actionable signal,,,,,,,,
+2026-11-21T03:45:55+00:00,AVAX/USD,BUY,order_placed,436.78,100.0,"[limit @ $6.165] price ($6.1650) is 2.62 standard deviations below its 96-bar average ($6.6686) - likely oversold, buying the dip",6.668646,-2.6179,,,,,,
+2026-11-21T03:45:55+00:00,DOGE/USD,BUY,order_placed,436.78,83.6658680319037,"[limit @ $0.0518904] price ($0.0519) is 2.09 standard deviations below its 96-bar average ($0.0553) - likely oversold, buying the dip",0.055344,-2.0916,,,,,,
+2026-11-21T03:45:55+00:00,DOT/USD,BUY,order_placed,436.78,100.0,"[limit @ $0.6296] price ($0.6296) is 2.59 standard deviations below its 96-bar average ($0.6787) - likely oversold, buying the dip",0.678706,-2.5931,,,,,,
+2026-11-21T03:45:55+00:00,GRT/USD,BUY,order_placed,436.78,100.0,"[limit @ $0.0151] price ($0.0151) is 2.63 standard deviations below its 96-bar average ($0.0161) - likely oversold, buying the dip",0.016099,-2.6259,,,,,,
+2026-11-21T03:45:55+00:00,ONDO/USD,BUY,order_placed,436.78,100.0,"[limit @ $0.26291] price ($0.2629) is 2.98 standard deviations below its 96-bar average ($0.2843) - likely oversold, buying the dip",0.284328,-2.9751,,,,,,
+2026-11-21T03:45:55+00:00,SUSHI/USD,BUY,order_placed,410.32,70.0540491231531,"[limit @ $0.142] price ($0.1420) is 1.75 standard deviations below its 96-bar average ($0.1475) - likely oversold, buying the dip",0.147527,-1.7514,,,,,,
