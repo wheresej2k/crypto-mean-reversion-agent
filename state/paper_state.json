@@ -13,7 +13,7 @@
       "target_price": 0.121716,
       "trade_id": "51be4cd7",
       "opened_at": "2026-11-23T19:45:39+00:00",
-      "checked_through": "2026-11-23T20:15:00+00:00",
+      "checked_through": "2026-11-23T20:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "RENDER/USD": {
@@ -25,7 +25,7 @@
       "target_price": 1.42236,
       "trade_id": "08e519f6",
       "opened_at": "2026-11-23T19:45:39+00:00",
-      "checked_through": "2026-11-23T20:15:00+00:00",
+      "checked_through": "2026-11-23T20:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -49,5 +49,16 @@
       }
     }
   },
-  "pending_orders": {}
+  "pending_orders": {
+    "BAT/USD": {
+      "side": "buy",
+      "limit": 0.07588,
+      "placed_after": "2026-11-23T20:30:00+00:00",
+      "notional": 439.48,
+      "confidence": 46.5235120073288,
+      "reasoning": "price ($0.0759) is 1.16 standard deviations below its 96-bar average ($0.0778) - likely oversold, buying the dip",
+      "rolling_mean": 0.077826,
+      "zscore": -1.1631
+    }
+  }
 }
