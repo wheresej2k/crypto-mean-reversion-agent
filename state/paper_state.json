@@ -1,9 +1,34 @@
 {
-  "cash": 87899.71402321698,
+  "cash": 87017.19802321697,
   "starting_cash": 100000.0,
   "day_start_equity": 87718.36932018158,
   "day_start_date": "2026-11-23",
-  "positions": {},
+  "positions": {
+    "ARB/USD": {
+      "qty": 3899.7338065661047,
+      "entry_price": 0.1127,
+      "entry_notional": 439.5,
+      "entry_fee": 1.758,
+      "stop_price": 0.10142999999999999,
+      "target_price": 0.121716,
+      "trade_id": "51be4cd7",
+      "opened_at": "2026-11-23T19:45:39+00:00",
+      "checked_through": "2026-11-23T19:30:00+00:00",
+      "strategy": "mean_reversion"
+    },
+    "RENDER/USD": {
+      "qty": 333.71298405466973,
+      "entry_price": 1.317,
+      "entry_notional": 439.5,
+      "entry_fee": 1.758,
+      "stop_price": 1.1853,
+      "target_price": 1.42236,
+      "trade_id": "08e519f6",
+      "opened_at": "2026-11-23T19:45:39+00:00",
+      "checked_through": "2026-11-23T19:30:00+00:00",
+      "strategy": "mean_reversion"
+    }
+  },
   "trend": {
     "last_close_handled": "2026-11-22",
     "targets": {
@@ -24,26 +49,5 @@
       }
     }
   },
-  "pending_orders": {
-    "ARB/USD": {
-      "side": "buy",
-      "limit": 0.1127,
-      "placed_after": "2026-11-23T19:15:00+00:00",
-      "notional": 439.5,
-      "confidence": 55.03798204921793,
-      "reasoning": "price ($0.1127) is 1.38 standard deviations below its 96-bar average ($0.1151) - likely oversold, buying the dip",
-      "rolling_mean": 0.115116,
-      "zscore": -1.3759
-    },
-    "RENDER/USD": {
-      "side": "buy",
-      "limit": 1.317,
-      "placed_after": "2026-11-23T19:15:00+00:00",
-      "notional": 439.5,
-      "confidence": 55.41020584660831,
-      "reasoning": "price ($1.3170) is 1.39 standard deviations below its 96-bar average ($1.3394) - likely oversold, buying the dip",
-      "rolling_mean": 1.339417,
-      "zscore": -1.3853
-    }
-  }
+  "pending_orders": {}
 }
