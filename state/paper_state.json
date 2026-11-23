@@ -1,5 +1,5 @@
 {
-  "cash": 84070.8482541841,
+  "cash": 84520.98884920124,
   "starting_cash": 100000.0,
   "day_start_equity": 87718.36932018158,
   "day_start_date": "2026-11-23",
@@ -13,7 +13,7 @@
       "target_price": 1.0309788,
       "trade_id": "f44bd49b",
       "opened_at": "2026-11-19T21:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "SHIB/USD": {
@@ -25,7 +25,7 @@
       "target_price": 3.898800000000001e-06,
       "trade_id": "9b761cb2",
       "opened_at": "2026-11-20T15:30:40+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -37,7 +37,7 @@
       "target_price": 106.4556,
       "trade_id": "bfe1183f",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "BONK/USD": {
@@ -49,7 +49,7 @@
       "target_price": 2.25612e-06,
       "trade_id": "824781f3",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "LDO/USD": {
@@ -61,7 +61,7 @@
       "target_price": 0.26244,
       "trade_id": "582848c2",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "LTC/USD": {
@@ -73,7 +73,7 @@
       "target_price": 43.675200000000004,
       "trade_id": "cd8090d8",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "PEPE/USD": {
@@ -85,7 +85,7 @@
       "target_price": 3.66336e-06,
       "trade_id": "1c3f110c",
       "opened_at": "2026-11-20T15:45:35+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "WIF/USD": {
@@ -97,7 +97,7 @@
       "target_price": 0.129276,
       "trade_id": "6f639c7c",
       "opened_at": "2026-11-20T16:00:41+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "SKY/USD": {
@@ -109,19 +109,7 @@
       "target_price": 0.04675320000000001,
       "trade_id": "9150de07",
       "opened_at": "2026-11-22T14:30:39+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "TRUMP/USD": {
-      "qty": 501.0514285714286,
-      "entry_price": 0.875,
-      "entry_notional": 438.42,
-      "entry_fee": 1.7536800000000001,
-      "stop_price": 0.7875,
-      "target_price": 0.9450000000000001,
-      "trade_id": "0619fab8",
-      "opened_at": "2026-11-23T02:15:40+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -133,7 +121,7 @@
       "target_price": 0.0830196,
       "trade_id": "0125ddd2",
       "opened_at": "2026-11-23T02:30:45+00:00",
-      "checked_through": "2026-11-23T05:30:00+00:00",
+      "checked_through": "2026-11-23T05:45:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -158,13 +146,13 @@
     }
   },
   "pending_orders": {
-    "TRUMP/USD": {
+    "WIF/USD": {
       "side": "sell",
-      "limit": 0.902,
-      "placed_after": "2026-11-23T05:30:00+00:00",
-      "qty": 501.0514285714286,
-      "confidence": 48.66457202041082,
-      "reasoning": "price ($0.9020) has reverted to +1.22 standard deviations vs its 96-bar average ($0.8914) - taking the reversion, exiting position"
+      "limit": 0.1229,
+      "placed_after": "2026-11-23T05:45:00+00:00",
+      "qty": 829.9916457811194,
+      "confidence": 100.0,
+      "reasoning": "price ($0.1229) has reverted to +2.52 standard deviations vs its 96-bar average ($0.1196) - taking the reversion, exiting position"
     }
   }
 }
