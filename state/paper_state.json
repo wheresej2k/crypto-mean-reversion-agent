@@ -13,7 +13,7 @@
       "target_price": 0.121716,
       "trade_id": "51be4cd7",
       "opened_at": "2026-11-23T19:45:39+00:00",
-      "checked_through": "2026-11-23T21:45:00+00:00",
+      "checked_through": "2026-11-23T22:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "RENDER/USD": {
@@ -25,7 +25,7 @@
       "target_price": 1.42236,
       "trade_id": "08e519f6",
       "opened_at": "2026-11-23T19:45:39+00:00",
-      "checked_through": "2026-11-23T21:45:00+00:00",
+      "checked_through": "2026-11-23T22:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -37,7 +37,7 @@
       "target_price": 0.0819504,
       "trade_id": "19982b71",
       "opened_at": "2026-11-23T21:00:46+00:00",
-      "checked_through": "2026-11-23T21:45:00+00:00",
+      "checked_through": "2026-11-23T22:00:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -61,5 +61,16 @@
       }
     }
   },
-  "pending_orders": {}
+  "pending_orders": {
+    "CRV/USD": {
+      "side": "buy",
+      "limit": 0.17841,
+      "placed_after": "2026-11-23T22:00:00+00:00",
+      "notional": 439.4,
+      "confidence": 52.11323359736096,
+      "reasoning": "price ($0.1784) is 1.30 standard deviations below its 96-bar average ($0.1836) - likely oversold, buying the dip",
+      "rolling_mean": 0.183616,
+      "zscore": -1.3028
+    }
+  }
 }
