@@ -24,5 +24,26 @@
       }
     }
   },
-  "pending_orders": {}
+  "pending_orders": {
+    "ARB/USD": {
+      "side": "buy",
+      "limit": 0.1127,
+      "placed_after": "2026-11-23T19:15:00+00:00",
+      "notional": 439.5,
+      "confidence": 55.03798204921793,
+      "reasoning": "price ($0.1127) is 1.38 standard deviations below its 96-bar average ($0.1151) - likely oversold, buying the dip",
+      "rolling_mean": 0.115116,
+      "zscore": -1.3759
+    },
+    "RENDER/USD": {
+      "side": "buy",
+      "limit": 1.317,
+      "placed_after": "2026-11-23T19:15:00+00:00",
+      "notional": 439.5,
+      "confidence": 55.41020584660831,
+      "reasoning": "price ($1.3170) is 1.39 standard deviations below its 96-bar average ($1.3394) - likely oversold, buying the dip",
+      "rolling_mean": 1.339417,
+      "zscore": -1.3853
+    }
+  }
 }
