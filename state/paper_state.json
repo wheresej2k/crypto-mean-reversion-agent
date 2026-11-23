@@ -24,16 +24,5 @@
       }
     }
   },
-  "pending_orders": {
-    "SKY/USD": {
-      "side": "buy",
-      "limit": 0.03974,
-      "placed_after": "2026-11-23T16:15:00+00:00",
-      "notional": 439.5,
-      "confidence": 48.237486650945776,
-      "reasoning": "price ($0.0397) is 1.21 standard deviations below its 96-bar average ($0.0410) - likely oversold, buying the dip",
-      "rolling_mean": 0.041012,
-      "zscore": -1.2059
-    }
-  }
+  "pending_orders": {}
 }
