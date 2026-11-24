@@ -1,5 +1,5 @@
 {
-  "cash": 84860.44082500192,
+  "cash": 84419.08242500192,
   "starting_cash": 100000.0,
   "day_start_equity": 87907.31080597185,
   "day_start_date": "2026-11-24",
@@ -13,7 +13,7 @@
       "target_price": 1.42236,
       "trade_id": "08e519f6",
       "opened_at": "2026-11-23T19:45:39+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "CRV/USD": {
@@ -25,7 +25,7 @@
       "target_price": 0.19268280000000002,
       "trade_id": "87c444fa",
       "opened_at": "2026-11-23T22:30:42+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -37,7 +37,7 @@
       "target_price": 0.94608,
       "trade_id": "f7c18d66",
       "opened_at": "2026-11-23T23:30:40+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "SKY/USD": {
@@ -49,7 +49,7 @@
       "target_price": 0.0427788,
       "trade_id": "177eee4a",
       "opened_at": "2026-11-24T02:30:39+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -61,7 +61,7 @@
       "target_price": 104.16600000000001,
       "trade_id": "c2c1ec32",
       "opened_at": "2026-11-24T03:15:34+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "LDO/USD": {
@@ -73,7 +73,7 @@
       "target_price": 0.25488,
       "trade_id": "c321eeb9",
       "opened_at": "2026-11-24T03:15:34+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     },
     "ONDO/USD": {
@@ -85,7 +85,19 @@
       "target_price": 0.3085992,
       "trade_id": "ef3cfe9f",
       "opened_at": "2026-11-24T08:30:42+00:00",
-      "checked_through": "2026-11-24T08:15:00+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
+      "strategy": "mean_reversion"
+    },
+    "AVAX/USD": {
+      "qty": 65.7100149476831,
+      "entry_price": 6.69,
+      "entry_notional": 439.6,
+      "entry_fee": 1.7584000000000004,
+      "stop_price": 6.021000000000001,
+      "target_price": 7.225200000000001,
+      "trade_id": "cf84f8c8",
+      "opened_at": "2026-11-24T08:45:40+00:00",
+      "checked_through": "2026-11-24T08:30:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -109,16 +121,5 @@
       }
     }
   },
-  "pending_orders": {
-    "AVAX/USD": {
-      "side": "buy",
-      "limit": 6.69,
-      "placed_after": "2026-11-24T08:15:00+00:00",
-      "notional": 439.6,
-      "confidence": 44.90362726605092,
-      "reasoning": "price ($6.6900) is 1.12 standard deviations below its 96-bar average ($6.8115) - likely oversold, buying the dip",
-      "rolling_mean": 6.811479,
-      "zscore": -1.1226
-    }
-  }
+  "pending_orders": {}
 }
