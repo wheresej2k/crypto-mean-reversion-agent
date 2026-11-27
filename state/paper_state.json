@@ -13,7 +13,7 @@
       "target_price": 0.19268280000000002,
       "trade_id": "87c444fa",
       "opened_at": "2026-11-23T22:30:42+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -25,7 +25,7 @@
       "target_price": 104.16600000000001,
       "trade_id": "c2c1ec32",
       "opened_at": "2026-11-24T03:15:34+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "AVAX/USD": {
@@ -37,7 +37,7 @@
       "target_price": 7.225200000000001,
       "trade_id": "cf84f8c8",
       "opened_at": "2026-11-24T08:45:40+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "GRT/USD": {
@@ -49,7 +49,7 @@
       "target_price": 0.0178524,
       "trade_id": "be62c252",
       "opened_at": "2026-11-24T09:30:47+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "YFI/USD": {
@@ -61,7 +61,7 @@
       "target_price": 1777.5720000000001,
       "trade_id": "abf20095",
       "opened_at": "2026-11-24T11:00:48+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "BONK/USD": {
@@ -73,7 +73,7 @@
       "target_price": 2.3338800000000005e-06,
       "trade_id": "6a945bc2",
       "opened_at": "2026-11-24T11:30:39+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -85,7 +85,7 @@
       "target_price": 0.08458560000000001,
       "trade_id": "900720ff",
       "opened_at": "2026-11-26T23:30:40+00:00",
-      "checked_through": "2026-11-27T12:00:00+00:00",
+      "checked_through": "2026-11-27T12:15:00+00:00",
       "strategy": "mean_reversion"
     }
   },
