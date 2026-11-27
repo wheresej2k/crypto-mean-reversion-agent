@@ -1,5 +1,5 @@
 {
-  "cash": 84021.64387378193,
+  "cash": 84472.32872496836,
   "starting_cash": 100000.0,
   "day_start_equity": 87993.30052407907,
   "day_start_date": "2026-11-27",
@@ -13,7 +13,7 @@
       "target_price": 0.19268280000000002,
       "trade_id": "87c444fa",
       "opened_at": "2026-11-23T22:30:42+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "AAVE/USD": {
@@ -25,19 +25,7 @@
       "target_price": 104.16600000000001,
       "trade_id": "c2c1ec32",
       "opened_at": "2026-11-24T03:15:34+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
-      "strategy": "mean_reversion"
-    },
-    "LDO/USD": {
-      "qty": 1862.1186440677966,
-      "entry_price": 0.236,
-      "entry_notional": 439.46,
-      "entry_fee": 1.7578399999999998,
-      "stop_price": 0.2124,
-      "target_price": 0.25488,
-      "trade_id": "c321eeb9",
-      "opened_at": "2026-11-24T03:15:34+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "AVAX/USD": {
@@ -49,7 +37,7 @@
       "target_price": 7.225200000000001,
       "trade_id": "cf84f8c8",
       "opened_at": "2026-11-24T08:45:40+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "GRT/USD": {
@@ -61,7 +49,7 @@
       "target_price": 0.0178524,
       "trade_id": "be62c252",
       "opened_at": "2026-11-24T09:30:47+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "SHIB/USD": {
@@ -73,7 +61,7 @@
       "target_price": 3.88152e-06,
       "trade_id": "c68617c7",
       "opened_at": "2026-11-24T10:45:34+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "UNI/USD": {
@@ -85,7 +73,7 @@
       "target_price": 5.129784,
       "trade_id": "493c4caa",
       "opened_at": "2026-11-24T10:45:34+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "YFI/USD": {
@@ -97,7 +85,7 @@
       "target_price": 1777.5720000000001,
       "trade_id": "abf20095",
       "opened_at": "2026-11-24T11:00:48+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "BONK/USD": {
@@ -109,7 +97,7 @@
       "target_price": 2.3338800000000005e-06,
       "trade_id": "6a945bc2",
       "opened_at": "2026-11-24T11:30:39+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "BAT/USD": {
@@ -121,7 +109,7 @@
       "target_price": 0.08458560000000001,
       "trade_id": "900720ff",
       "opened_at": "2026-11-26T23:30:40+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     },
     "TRUMP/USD": {
@@ -133,7 +121,7 @@
       "target_price": 0.9277200000000001,
       "trade_id": "df7d128b",
       "opened_at": "2026-11-26T23:30:40+00:00",
-      "checked_through": "2026-11-27T04:45:00+00:00",
+      "checked_through": "2026-11-27T05:00:00+00:00",
       "strategy": "mean_reversion"
     }
   },
@@ -157,14 +145,5 @@
       }
     }
   },
-  "pending_orders": {
-    "LDO/USD": {
-      "side": "sell",
-      "limit": 0.243,
-      "placed_after": "2026-11-27T04:45:00+00:00",
-      "qty": 1862.1186440677966,
-      "confidence": 100.0,
-      "reasoning": "price ($0.2430) has reverted to +3.03 standard deviations vs its 96-bar average ($0.2360) - taking the reversion, exiting position"
-    }
-  }
+  "pending_orders": {}
 }
